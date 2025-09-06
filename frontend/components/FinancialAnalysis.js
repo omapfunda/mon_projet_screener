@@ -7,7 +7,7 @@ export default function FinancialAnalysis({ results }) {
   return (
     <div style={{marginTop: '3rem'}}>
       <h2>Étape 2 : Analyse Financière Approfondie</h2>
-      <p>Sélectionnez une entreprise dans le tableau ci-dessus pour l'analyser en détail.</p>
+      <p>Sélectionnez une entreprise dans le tableau ci-dessus pour l&apos;analyser en détail.</p>
       {/* La logique pour le sélecteur, l'appel API et l'affichage des états financiers viendra ici */}
     </div>
   );
