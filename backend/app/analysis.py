@@ -305,14 +305,14 @@ def get_dcf_analysis(ticker: str):
         stock = StockdexTicker(ticker=ticker)
         
         # Utilisation des méthodes de la bibliothèque stockdex
-        is_df_raw = stock.macrotrends_income_statement.T
-        bs_df_raw = stock.macrotrends_balance_sheet.T
-        cf_df_raw = stock.macrotrends_cash_flow.T
+        is_df_raw = stock.macrotrends_income_statement
+        bs_df_raw = stock.macrotrends_balance_sheet
+        cf_df_raw = stock.macrotrends_cash_flow
         print("✅ Données brutes récupérées.")
 
         # --- ÉTAPE DE NETTOYAGE ET CONVERSION DES DONNÉES ---
         # Cette nouvelle étape est cruciale pour éviter les erreurs de type.
-        dataframes = {'is_df': is_df_raw, 'bs_df': bs_df_raw, 'cf_df': cf_df_raw}
+        dataframes = {'is_df': is_df_raw.T, 'bs_df': bs_df_raw.T, 'cf_df': cf_df_raw.T}
         cleaned_dfs = {}
         for name, df in dataframes.items():
             if df.empty:
