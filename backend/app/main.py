@@ -22,10 +22,10 @@ origins = [
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
-    allow_origin_regex="https://.*\\.vercel\\.app", // Ajout pour autoriser les déploiements Vercel
+    allow_origin_regex="https://.*\\.vercel\\.app", # Ajout pour autoriser les déploiements Vercel
     allow_credentials=True,
-    allow_methods=["*"], // Autorise toutes les méthodes (GET, POST, etc.)
-    allow_headers=["*"], // Autorise tous les en-têtes
+    allow_methods=["*"], # Autorise toutes les méthodes (GET, POST, etc.)
+    allow_headers=["*"], # Autorise tous les en-têtes
 )
 
 
