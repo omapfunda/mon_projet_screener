@@ -15,14 +15,9 @@ app = FastAPI(
 # Configuration du CORS (Cross-Origin Resource Sharing)
 # C'est une sécurité OBLIGATOIRE pour permettre à votre frontend Next.js
 # de faire des requêtes à ce backend depuis un domaine différent.
-origins = [
-    "http://localhost:3000",  # L'URL de votre frontend Next.js en développement
-    "https://mon-projet-screener.vercel.app", # Ajoutez l'URL de production
-]
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,
-    allow_origin_regex="https://.*\\.vercel\\.app", # Ajout pour autoriser les déploiements Vercel
+    allow_origin_regex="https://.*\\.vercel\\.app|http://localhost:3000", # Autorise Vercel et le dev local
     allow_credentials=True,
     allow_methods=["*"], # Autorise toutes les méthodes (GET, POST, etc.)
     allow_headers=["*"], # Autorise tous les en-têtes
