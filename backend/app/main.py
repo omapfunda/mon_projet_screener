@@ -17,7 +17,7 @@ app = FastAPI(
 # de faire des requêtes à ce backend depuis un domaine différent.
 origins = [
     "http://localhost:3000",  # L'URL de votre frontend Next.js en développement
-    # "https://votre-site-en-production.com" # Ajoutez l'URL de production
+    "https://mon-projet-screener.vercel.app", # Ajoutez l'URL de production
 ]
 app.add_middleware(
     CORSMiddleware,
