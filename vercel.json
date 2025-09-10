@@ -2,8 +2,9 @@
   "version": 2,
   "builds": [
     {
-      "src": "frontend/next.config.ts",
-      "use": "@vercel/next"
+      "src": "frontend/package.json",
+      "use": "@vercel/next",
+      "config": { "zeroConfig": true }
     },
     {
       "src": "backend/app/main.py",
@@ -12,11 +13,11 @@
   ],
   "rewrites": [
     {
-      "source": "/api/:path*",
+      "source": "/api/(.*)",
       "destination": "/backend/app/main.py"
     },
     {
-      "source": "/:path*",
+      "source": "/(.*)",
       "destination": "/frontend"
     }
   ]
