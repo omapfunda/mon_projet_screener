@@ -1,6 +1,6 @@
 // Fichier : frontend/lib/api.js
 
-const API_BASE_URL = "https://mon-projet-screener.vercel.app//api";
+const API_BASE_URL = "https://mon-projet-screener.vercel.app";
 
 /**
  * Récupère la liste des indices disponibles.
