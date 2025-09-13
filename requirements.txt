@@ -1,10 +1,7 @@
-# Fichier : backend/requirements.txt
+# Fichier : requirements.txt (à la racine du projet)
 
 # Framework pour l'API
 fastapi
-
-# Serveur web pour FastAPI
-uvicorn[standard]
 
 # Bibliothèques d'analyse financière et de données
 yfinance
@@ -17,6 +14,5 @@ pydantic
 
 requests
 
-# NOUVELLE bibliothèque pour le scraping de données financières
+# Bibliothèque pour le scraping de données financières
 stockdex
-python-multipart
