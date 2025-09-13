@@ -1,7 +1,12 @@
 # Fichier : requirements.txt (à la racine du projet)
+
+# Serveur ASGI et gestionnaire de processus de production
+gunicorn
 uvicorn
+
 # Framework pour l'API
 fastapi
+python-multipart
 
 # Bibliothèques d'analyse financière et de données
 yfinance
