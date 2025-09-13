@@ -305,9 +305,9 @@ def get_dcf_analysis(ticker: str):
         stock = StockdexTicker(ticker=ticker)
         
         # Utilisation des méthodes de la bibliothèque stockdex
-        is_df_raw = stock.macrotrends_income_statement
-        bs_df_raw = stock.macrotrends_balance_sheet
-        cf_df_raw = stock.macrotrends_cash_flow
+        is_df_raw = stock.macrotrends_income_statement(frequency='annual')
+        bs_df_raw = stock.macrotrends_balance_sheet(frequency='annual')
+        cf_df_raw = stock.macrotrends_cash_flow(frequency='annual')
         print("✅ Données brutes récupérées.")
 
         # --- ÉTAPE DE NETTOYAGE ET CONVERSION DES DONNÉES ---

@@ -3,7 +3,8 @@
 
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from . import analysis, schemas
+import analysis
+import schemas
 
 # Création de l'instance FastAPI
 app = FastAPI(
