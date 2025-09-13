@@ -18,7 +18,7 @@ app = FastAPI(
 # de faire des requêtes à ce backend depuis un domaine différent.
 app.add_middleware(
     CORSMiddleware,
-    allow_origin_regex="https://.*\\.vercel\\.app|http://localhost:3000", # Autorise Vercel et le dev local
+    allow_origin_regex="https://.*\\.onrender\\.com|http://localhost:3000", # Autorise Render et le dev local
     allow_credentials=True,
     allow_methods=["*"], # Autorise toutes les méthodes (GET, POST, etc.)
     allow_headers=["*"], # Autorise tous les en-têtes
