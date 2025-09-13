@@ -302,7 +302,7 @@ def get_dcf_analysis(ticker: str):
     """
     try:
         print(f"▶️  Récupération des données pour {ticker} via stockdex...")
-        stock = StockdexTicker(ticker=ticker)
+        stock = StockdexTicker(ticker=ticker, headless=True)
         
         # Utilisation des méthodes de la bibliothèque stockdex
         is_df_raw = stock.macrotrends_income_statement(frequency='annual')
