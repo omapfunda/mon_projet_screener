@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: mon-projet-screener-api # Assurez-vous que ce nom est correct
+    name: mon_projet_screener_api # Assurez-vous que ce nom est correct
     env: docker
     rootDir: .                   # On utilise la racine du projet comme contexte
     plan: free
