@@ -1,8 +1,8 @@
 services:
   - type: web
     name: mon-projet-screener-api # Assurez-vous que ce nom est correct
-    env: docker                  # On passe à un environnement Docker
-    rootDir: api                 # Le Dockerfile est dans ce dossier
+    env: docker
+    rootDir: .                   # On utilise la racine du projet comme contexte
     plan: free
-    dockerfilePath: ./Dockerfile # On indique le chemin vers notre Dockerfile
+    dockerfilePath: ./api/Dockerfile # On indique le chemin explicite vers le Dockerfile
     # Les clés buildCommand, startCommand et buildpacks sont supprimées car gérées par le Dockerfile
