@@ -1,0 +1,10 @@
+services:
+  - type: web
+    name: mon-projet-screener-api # IMPORTANT: Mettez ici le nom exact de votre service backend sur Render
+    env: python
+    rootDir: api
+    plan: free # ou le plan que vous utilisez (ex: starter)
+    buildCommand: "pip install -r requirements.txt"
+    startCommand: "gunicorn -w 4 -k uvicorn.workers.UvicornWorker main:app --bind 0.0.0.0:$PORT"
+    buildpacks:
+      - url: https://github.com/heroku/heroku-buildpack-chrome-for-testing
