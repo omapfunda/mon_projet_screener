@@ -1,10 +1,8 @@
 services:
   - type: web
     name: mon-projet-screener-api # Assurez-vous que ce nom est correct
-    env: python
-    rootDir: api
+    env: docker                  # On passe à un environnement Docker
+    rootDir: api                 # Le Dockerfile est dans ce dossier
     plan: free
-    buildCommand: "pip install -r requirements.txt"
-    startCommand: "gunicorn -w 4 -k uvicorn.workers.UvicornWorker main:app --bind 0.0.0.0:$PORT"
-    buildpacks:
-      - url: https://github.com/heroku/heroku-buildpack-chrome-for-testing
+    dockerfilePath: ./Dockerfile # On indique le chemin vers notre Dockerfile
+    # Les clés buildCommand, startCommand et buildpacks sont supprimées car gérées par le Dockerfile
