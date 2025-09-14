@@ -1,9 +1,9 @@
 services:
   - type: web
-    name: mon-projet-screener-api # IMPORTANT: Mettez ici le nom exact de votre service backend sur Render
+    name: mon-projet-screener-api # Assurez-vous que ce nom est correct
     env: python
     rootDir: api
-    plan: free # ou le plan que vous utilisez (ex: starter)
+    plan: free
     buildCommand: "pip install -r requirements.txt"
     startCommand: "gunicorn -w 4 -k uvicorn.workers.UvicornWorker main:app --bind 0.0.0.0:$PORT"
     buildpacks:
