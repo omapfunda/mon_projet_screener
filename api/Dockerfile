@@ -20,6 +20,5 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copier le reste du code de l'application
 COPY ./api/ .
 
-# La commande pour lancer l'application (Render fournira la variable $PORT)
-# On utilise la forme "shell" pour que la variable $PORT soit interprétée
-CMD gunicorn -w 4 -k uvicorn.workers.UvicornWorker main:app --bind 0.0.0.0:$PORT
+# La commande pour lancer l'application avec Uvicorn seul (plus léger en ressources)
+CMD uvicorn main:app --host 0.0.0.0 --port $PORT
