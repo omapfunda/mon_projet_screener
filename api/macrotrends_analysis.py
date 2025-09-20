@@ -7,7 +7,7 @@ import numpy as np
 
 # --- CLASSES DE SCRAPING (INCHANGÉES) ---
 def get_response(url):
-    headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99.0.4844.82 Safari/537.36"}
+    headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"}
     session = requests.Session()
     return session.get(url, headers=headers)
 
