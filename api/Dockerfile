@@ -2,7 +2,7 @@
 FROM python:3.11-slim
 
 # Définir le répertoire de travail dans le conteneur
-WORKDIR /app
+WORKDIR .
 
 # Installer les dépendances système, y compris Google Chrome
 # Méthode moderne pour ajouter la clé GPG et le dépôt
@@ -21,4 +21,5 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY api/ .
 
 # La commande pour lancer l'application avec Uvicorn seul (plus léger en ressources)
+
 CMD uvicorn main:app --host 0.0.0.0 --port $PORT
