@@ -14,11 +14,11 @@ RUN apt-get update && apt-get install -y wget gnupg \
     && rm -rf /var/lib/apt/lists/*
 
 # Copier le fichier des dépendances et les installer
-COPY requirements.txt .
+COPY api/requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Copier le reste du code de l'application
-COPY ./api/ .
+COPY api/ .
 
 # La commande pour lancer l'application avec Uvicorn seul (plus léger en ressources)
 CMD uvicorn main:app --host 0.0.0.0 --port $PORT
