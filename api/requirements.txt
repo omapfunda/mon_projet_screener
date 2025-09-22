@@ -1,0 +1,24 @@
+# Fichier : requirements.txt (à la racine du projet)
+
+# Serveur ASGI et gestionnaire de processus de production
+gunicorn
+uvicorn
+
+# Framework pour l'API
+fastapi
+python-multipart
+selenium
+
+# Bibliothèques d'analyse financière et de données
+yfinance
+pandas
+numpy
+lxml
+
+# Pydantic est une dépendance de FastAPI, mais il est bon de l'expliciter
+pydantic
+
+requests
+
+# Bibliothèque pour le scraping de données financières
+stockdex
