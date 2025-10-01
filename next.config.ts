@@ -1,9 +1,6 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  // Configuration pour le déploiement sur Render
-  output: 'standalone',
-  
   // Optimisations pour la production
   experimental: {
     optimizeCss: true,
