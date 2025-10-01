@@ -7,9 +7,34 @@ import numpy as np
 
 # --- CLASSES DE SCRAPING (INCHANGÉES) ---
 def get_response(url):
-    headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"}
-    session = requests.Session()
-    return session.get(url, headers=headers)
+    """
+    Fonction améliorée pour récupérer les réponses HTTP avec gestion d'erreurs.
+    """
+    headers = {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+        'Accept-Language': 'en-US,en;q=0.5',
+        'Accept-Encoding': 'gzip, deflate',
+        'Connection': 'keep-alive',
+        'Upgrade-Insecure-Requests': '1',
+        'Sec-Fetch-Dest': 'document',
+        'Sec-Fetch-Mode': 'navigate',
+        'Sec-Fetch-Site': 'none',
+        'Cache-Control': 'max-age=0',
+    }
+    
+    try:
+        # Utiliser une session pour maintenir les cookies
+        session = requests.Session()
+        session.headers.update(headers)
+        
+        response = session.get(url, timeout=30)
+        if response.status_code == 403:
+            raise requests.exceptions.RequestException(f"Access forbidden (403) for URL: {url}")
+        response.raise_for_status()
+        return response
+    except requests.exceptions.RequestException as e:
+        raise requests.exceptions.RequestException(f"Failed to fetch URL (status {response.status_code if 'response' in locals() else 'unknown'}): {url} - {e}")
 
 class SingleBase:
     def __init__(self, ticker):
@@ -78,11 +103,19 @@ def get_processed_financial_data(ticker):
     required for the DCF valuation.
     """
     print(f"▶️  Récupération des données financières pour {ticker} via Macrotrends...")
-    stock = Ticker(ticker)
-    is_raw = stock.income_statement_annual
-    bs_raw = stock.balance_sheet_annual
-    cf_raw = stock.cash_flow_annual
-    print("✅ Données brutes récupérées.\n")
+    try:
+        stock = Ticker(ticker)
+        is_raw = stock.income_statement_annual
+        bs_raw = stock.balance_sheet_annual
+        cf_raw = stock.cash_flow_annual
+        
+        # Vérifier si les DataFrames sont vides (échec du scraping)
+        if is_raw.empty or bs_raw.empty or cf_raw.empty:
+            raise ValueError(f"Impossible de récupérer les données financières pour {ticker}. Le scraping a échoué (possiblement bloqué par le site).")
+        
+        print("✅ Données brutes récupérées.\n")
+    except Exception as e:
+        raise ValueError(f"Erreur de traitement des données pour {ticker} via stockdex: Failed to fetch URL (status 403): {e}")
     #print(is_raw)
     #return is_raw, bs_raw, cf_raw
     # --- Process Income Statement ---
@@ -112,6 +145,7 @@ def get_processed_financial_data(ticker):
 
     return is_df, cf_df, balance_sheet_latest, is_df['Year'].max()
 
+
 def run_dcf_valuation(fcf_growth_rate, perpetual_growth_rate, base_fcf, total_debt, cash, shares_outstanding):
     WACC = 0.0863
     PROJECTION_YEARS = 5
@@ -140,9 +174,9 @@ def run_dcf_valuation(fcf_growth_rate, perpetual_growth_rate, base_fcf, total_de
 # --- FONCTION PRINCIPALE D'ORCHESTRATION ---
 
 def get_dcf_analysis(ticker):
-    """Fonction principale appelée par l'API pour lancer l'analyse DCF complète."""
+    """Fonction principale pour obtenir l'analyse DCF d'un ticker donné."""
     try:
-        #stock = Ticker(ticker)
+        # Étape 1 : Récupération et traitement des données financières
         is_df, cf_df, balance_sheet_latest, latest_year = get_processed_financial_data(ticker)
         print(cf_df)
         base_fcf = cf_df.loc[latest_year, 'FCF']

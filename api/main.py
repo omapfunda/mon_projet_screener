@@ -1,6 +1,7 @@
 # main.py
 # Fichier : backend/app/main.py
 
+import os
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 import analysis
@@ -14,14 +15,25 @@ app = FastAPI(
 )
 
 # Configuration du CORS (Cross-Origin Resource Sharing)
-# C'est une sécurité OBLIGATOIRE pour permettre à votre frontend Next.js
-# de faire des requêtes à ce backend depuis un domaine différent.
+# Utilise les variables d'environnement pour plus de flexibilité
+FRONTEND_URL = os.getenv("FRONTEND_URL", "http://localhost:3000")
+ALLOWED_ORIGINS = [
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+    FRONTEND_URL,
+]
+
+# Ajouter les domaines Render automatiquement
+if FRONTEND_URL and "onrender.com" in FRONTEND_URL:
+    ALLOWED_ORIGINS.append(FRONTEND_URL)
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origin_regex="https://.*\\.onrender\\.com|http://localhost:3000", # Autorise Render et le dev local
+    allow_origins=ALLOWED_ORIGINS,
+    allow_origin_regex=r"https://.*\.onrender\.com",
     allow_credentials=True,
-    allow_methods=["*"], # Autorise toutes les méthodes (GET, POST, etc.)
-    allow_headers=["*"], # Autorise tous les en-têtes
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 
