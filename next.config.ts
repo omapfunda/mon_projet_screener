@@ -1,6 +1,9 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  // Configuration pour éviter les avertissements de workspace
+  outputFileTracingRoot: __dirname,
+  
   // Optimisations pour la production
   experimental: {
     optimizeCss: true,
