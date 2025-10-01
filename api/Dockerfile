@@ -13,12 +13,29 @@ RUN apt-get update && apt-get install -y wget gnupg \
     && apt-get install -y google-chrome-stable \
     && rm -rf /var/lib/apt/lists/*
 
+# Créer un utilisateur non-root pour la sécurité
+RUN useradd --create-home --shell /bin/bash app
+
 # Copier le fichier des dépendances et les installer
-COPY api/requirements.txt .
+COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Copier le reste du code de l'application
-COPY api/ .
+COPY . .
 
-# La commande pour lancer l'application avec Uvicorn seul (plus léger en ressources)
-CMD uvicorn main:app --host 0.0.0.0 --port $PORT
+# Changer la propriété des fichiers vers l'utilisateur app
+RUN chown -R app:app /app
+
+# Basculer vers l'utilisateur non-root
+USER app
+
+# Exposer le port (Render utilise une variable d'environnement PORT)
+EXPOSE 8080
+
+# Variables d'environnement pour la production
+ENV PYTHONUNBUFFERED=1
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PORT=8080
+
+# La commande pour lancer l'application avec Uvicorn
+CMD uvicorn main:app --host 0.0.0.0 --port $PORT --workers 1

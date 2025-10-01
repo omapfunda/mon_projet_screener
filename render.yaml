@@ -1,8 +1,30 @@
 services:
+  # Service Backend API sur Render
   - type: web
-    name: mon_projet_screener_api # Assurez-vous que ce nom est correct
+    name: screener-api
     env: docker
-    rootDir: .                   # On utilise la racine du projet comme contexte
+    rootDir: ./api
     plan: free
-    dockerfilePath: ./api/Dockerfile # On indique le chemin explicite vers le Dockerfile
-    # Les clés buildCommand, startCommand et buildpacks sont supprimées car gérées par le Dockerfile
+    dockerfilePath: ./Dockerfile
+    envVars:
+      - key: PORT
+        value: 8080
+    healthCheckPath: /
+    autoDeploy: true
+    branch: main  # ou master selon votre branche principale
+
+  # Service Frontend sur Render
+  - type: web
+    name: screener-frontend
+    env: node
+    plan: free
+    buildCommand: npm ci && npm run build
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: NEXT_PUBLIC_API_URL
+        value: https://screener-api.onrender.com
+    healthCheckPath: /
+    autoDeploy: true
+    branch: main  # ou master selon votre branche principale
