@@ -37,5 +37,5 @@ ENV PYTHONUNBUFFERED=1
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PORT=8080
 
-# La commande pour lancer l'application avec Uvicorn
-CMD uvicorn main:app --host 0.0.0.0 --port $PORT --workers 1
+# La commande pour lancer l'application avec Gunicorn et Uvicorn workers
+CMD gunicorn main:app -w 1 -k uvicorn.workers.UvicornWorker --bind 0.0.0.0:$PORT

@@ -2,7 +2,7 @@
 
 # Serveur ASGI et gestionnaire de processus de production
 gunicorn
-uvicorn
+uvicorn[standard]
 
 # Framework pour l'API
 fastapi
