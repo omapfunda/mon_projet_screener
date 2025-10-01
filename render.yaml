@@ -26,7 +26,7 @@ services:
       - key: NEXT_PUBLIC_API_URL
         value: https://screener-api-rzrn.onrender.com
       - key: NODE_VERSION
-        value: 18.17.0
+        value: 20.18.0
     healthCheckPath: /
     autoDeploy: true
     branch: main  # ou master selon votre branche principale
