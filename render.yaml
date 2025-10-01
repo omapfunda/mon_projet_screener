@@ -24,7 +24,7 @@ services:
       - key: NODE_ENV
         value: production
       - key: NEXT_PUBLIC_API_URL
-        value: https://screener-api.onrender.com
+        value: https://screener-api-rzrn.onrender.com
     healthCheckPath: /
     autoDeploy: true
     branch: main  # ou master selon votre branche principale
