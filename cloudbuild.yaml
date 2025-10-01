@@ -1,23 +1,47 @@
 steps:
 # Build the container image
 - name: 'gcr.io/cloud-builders/docker'
-  args: ['build', '-t', 'europe-west1-docker.pkg.dev/mon-projet-screener-api/mon-projet-screener-api/mon-projet-screener-api:latest', '-f', 'api/Dockerfile', '.']
-# Push the image to Artifact Registry
+  args: 
+    - 'build'
+    - '-t'
+    - 'europe-west1-docker.pkg.dev/${PROJECT_ID}/screener-api-repo/screener-api:$BUILD_ID'
+    - '-t'
+    - 'europe-west1-docker.pkg.dev/${PROJECT_ID}/screener-api-repo/screener-api:latest'
+    - '-f'
+    - 'api/Dockerfile'
+    - '.'
+
+# Push the container image to Artifact Registry
 - name: 'gcr.io/cloud-builders/docker'
-  args: ['push', 'europe-west1-docker.pkg.dev/mon-projet-screener-api/mon-projet-screener-api/mon-projet-screener-api:latest']
+  args: 
+    - 'push'
+    - '--all-tags'
+    - 'europe-west1-docker.pkg.dev/${PROJECT_ID}/screener-api-repo/screener-api'
+
 # Deploy to Cloud Run
 - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
   entrypoint: gcloud
   args:
     - 'run'
     - 'deploy'
-    - 'mon-projet-screener-api'
+    - 'screener-api'
     - '--image'
-    - 'europe-west1-docker.pkg.dev/mon-projet-screener-api/mon-projet-screener-api/mon-projet-screener-api:latest'
+    - 'europe-west1-docker.pkg.dev/${PROJECT_ID}/screener-api-repo/screener-api:$BUILD_ID'
     - '--region'
     - 'europe-west1'
     - '--platform'
     - 'managed'
     - '--allow-unauthenticated'
+    - '--port'
+    - '8000'
+    - '--memory'
+    - '2Gi'
+    - '--cpu'
+    - '1'
+    - '--max-instances'
+    - '10'
+    - '--timeout'
+    - '300'
+
 images:
-- 'europe-west1-docker.pkg.dev/mon-projet-screener-api/mon-projet-screener-api/mon-projet-screener-api:latest'
+- 'europe-west1-docker.pkg.dev/${PROJECT_ID}/screener-api-repo/screener-api:$BUILD_ID'
