@@ -4,7 +4,8 @@
 import os
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-import analysis
+import analysis  # Yahoo Finance for screening
+import fmp_analysis  # FMP for DCF
 import schemas
 
 # Création de l'instance FastAPI
@@ -63,13 +64,31 @@ def run_screening(request: schemas.ScreeningRequest):
 @app.get("/dcf-valuation/{ticker}", tags=["Analysis"])
 def get_dcf_valuation(ticker: str):
     """
-    Lance une analyse DCF à 2 scénarios basée sur les données de Macrotrends.
+    Lance une analyse DCF à 2 scénarios basée sur les données de FMP.
     C'est le nouvel endpoint pour l'Étape 2.
     """
-    valuation_results = analysis.get_dcf_analysis(ticker)
+    valuation_results = fmp_analysis.get_dcf_analysis(ticker)
     if "error" in valuation_results:
         raise HTTPException(status_code=404, detail=f"L'analyse DCF a échoué pour {ticker}: {valuation_results['error']}")
-    return valuation_results
+    
+    # Transform data to match frontend expectations
+    transformed_data = {
+        "base_data": valuation_results.get("base_data", {}),
+        "optimistic_scenario": {
+            "fair_value": valuation_results.get("scenario1", {}).get("intrinsic_value"),
+            "revenue_growth_rate": valuation_results.get("scenario1", {}).get("assumptions", {}).get("fcf_growth"),
+            "wacc": 0.10,  # Default WACC value
+            "terminal_growth_rate": valuation_results.get("scenario1", {}).get("assumptions", {}).get("perp_growth")
+        },
+        "conservative_scenario": {
+            "fair_value": valuation_results.get("scenario2", {}).get("intrinsic_value"),
+            "revenue_growth_rate": valuation_results.get("scenario2", {}).get("assumptions", {}).get("fcf_growth"),
+            "wacc": 0.10,  # Default WACC value
+            "terminal_growth_rate": valuation_results.get("scenario2", {}).get("assumptions", {}).get("perp_growth")
+        }
+    }
+    
+    return transformed_data
     
 @app.get("/financials/{ticker}", tags=["Analysis"])
 def get_stock_financials(ticker: str):
@@ -77,7 +96,7 @@ def get_stock_financials(ticker: str):
     Récupère les états financiers détaillés pour un ticker donné.
     C'est l'endpoint pour l'Étape 2.
     """
-    financial_data = analysis.get_financial_statements(ticker)
+    financial_data = fmp_analysis.get_financial_statements(ticker)
     if not financial_data:
         raise HTTPException(status_code=404, detail=f"Données financières non trouvées pour le ticker {ticker}.")
     return financial_data

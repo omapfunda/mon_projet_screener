@@ -3,30 +3,33 @@ services:
   - type: web
     name: screener-api
     env: docker
-    rootDir: ./api
     plan: free
-    dockerfilePath: ./Dockerfile
+    dockerfilePath: ./api/Dockerfile
     envVars:
       - key: PORT
         value: 8080
+      - key: PYTHON_VERSION
+        value: 3.11
     healthCheckPath: /
     autoDeploy: true
-    branch: main  # ou master selon votre branche principale
+    branch: main
 
   # Service Frontend sur Render
   - type: web
     name: screener-frontend
     env: node
     plan: free
-    buildCommand: npm ci && npm run build
-    startCommand: npm start
+    buildCommand: "npm install && npm run build"
+    startCommand: "npm start"
     envVars:
       - key: NODE_ENV
         value: production
-      - key: NEXT_PUBLIC_API_URL
-        value: https://screener-api-rzrn.onrender.com
+      - fromService:
+          type: web
+          name: screener-api
+          envVarKey: NEXT_PUBLIC_API_URL
       - key: NODE_VERSION
-        value: 20.18.0
+        value: 20.11.1
     healthCheckPath: /
     autoDeploy: true
-    branch: main  # ou master selon votre branche principale
+    branch: main

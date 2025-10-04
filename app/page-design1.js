@@ -2,7 +2,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { fetchIndices, runScreening, fetchDcfValuation } from "../lib/api";
+import { fetchIndices, runScreening } from "../lib/api";
 import "./design1.css";
 
 const styles = {
@@ -88,26 +88,7 @@ const styles = {
   }
 };
 
-// Fonctions de formatage pour l'analyse DCF
-const formatCurrency = (num) => {
-  const val = parseFloat(num);
-  if (isNaN(val)) return 'N/A';
-  return `$${(val / 1000000).toFixed(0)}M`;
-};
-
-const formatPercent = (num) => {
-  const val = parseFloat(num);
-  if (isNaN(val)) return 'N/A';
-  return `${(val * 100).toFixed(2)}%`;
-};
-
-const formatSharePrice = (num) => {
-  const val = parseFloat(num);
-  if (isNaN(val)) return 'N/A';
-  return `$${val.toFixed(2)}`;
-};
-
-export default function Home() {
+export default function Design1Prototype() {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [indices, setIndices] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -115,11 +96,6 @@ export default function Home() {
   const [screeningResults, setScreeningResults] = useState(null);
   const [showResults, setShowResults] = useState(false);
   const [showAnalysis, setShowAnalysis] = useState(false);
-  
-  // État pour l'analyse DCF
-  const [valuationData, setValuationData] = useState(null);
-  const [dcfLoading, setDcfLoading] = useState(false);
-  const [dcfError, setDcfError] = useState(null);
   
   const [criteria, setCriteria] = useState({
     index_name: 'CAC 40 (France)',
@@ -171,20 +147,6 @@ export default function Home() {
     }
   };
 
-  const handleDcfAnalysis = async (ticker) => {
-    setDcfLoading(true);
-    setDcfError(null);
-    setValuationData(null);
-    try {
-      const data = await fetchDcfValuation(ticker);
-      setValuationData(data);
-    } catch (err) {
-      setDcfError(err.message);
-    } finally {
-      setDcfLoading(false);
-    }
-  };
-
   const downloadCSV = () => {
     if (!screeningResults) return;
     
@@ -192,7 +154,7 @@ export default function Home() {
     const csvContent = [
       headers.join(','),
       ...screeningResults.map(stock => [
-        stock.symbol,
+        stock.ticker,
         stock.current_price?.toFixed(2) || 'N/A',
         stock.intrinsic_value?.toFixed(2) || 'N/A',
         stock.score,
@@ -521,7 +483,7 @@ export default function Home() {
                           <span className="rank-badge">{index + 1}</span>
                         </td>
                         <td className="ticker-cell">
-                          <strong>{stock.symbol}</strong>
+                          <strong>{stock.ticker}</strong>
                         </td>
                         <td className="price-cell">${stock.current_price?.toFixed(2)}</td>
                         <td className={`intrinsic-cell ${stock.intrinsic_value > stock.current_price ? 'positive' : 'negative'}`}>
@@ -547,142 +509,48 @@ export default function Home() {
         )}
 
         {/* Analysis Section */}
-          {showAnalysis && !screeningResults && (
-            <div className="analysis-section">
-              <h2>Step 2: DCF Valuation</h2>
-              <div className="info-message">
-                <p>Please complete Step 1 (Screening) first to access DCF analysis.</p>
-                <p>The DCF analysis will be available for the stocks found in your screening results.</p>
-                <button 
-                  className="btn-primary" 
-                  onClick={() => showSection('screening')}
-                >
-                  Go to Screening
+        {showAnalysis && (
+          <div className="analysis-section">
+            <div className="analysis-grid">
+              <div className="analysis-card">
+                <div className="card-header">
+                  <h3>DCF Analysis</h3>
+                </div>
+                <p>Calculate intrinsic value with a custom discounted cash flow model.</p>
+                <button className="analysis-btn" onClick={() => alert('DCF functionality coming soon!')}>
+                  Launch DCF
                 </button>
               </div>
-            </div>
-          )}
-          
-          {showAnalysis && screeningResults && screeningResults.length === 0 && (
-            <div className="analysis-section">
-              <h2>Step 2: DCF Valuation</h2>
-              <div className="info-message">
-                <p>No stocks found in the screening results.</p>
-                <p>Please adjust your screening criteria to find stocks for DCF analysis.</p>
-                <button 
-                  className="btn-primary" 
-                  onClick={() => showSection('screening')}
-                >
-                  Adjust Screening Criteria
-                </button>
-              </div>
-            </div>
-          )}
-          
-          {showAnalysis && screeningResults && screeningResults.length > 0 && (
-            <div className="analysis-section">
-              <h2>Step 2: DCF Valuation (via Macrotrends)</h2>
               
-              <div className="dcf-container">
-                <div className="dcf-input-section">
-                  <label htmlFor="stock-select">Select a stock from screening results for DCF analysis:</label>
-                  <select 
-                    id="stock-select" 
-                    onChange={(e) => handleDcfAnalysis(e.target.value)}
-                    disabled={dcfLoading}
-                  >
-                    <option value="">-- Select a stock --</option>
-                    {screeningResults.map((stock, index) => (
-                      <option key={index} value={stock.symbol}>
-                        {stock.company_name} ({stock.symbol})
-                      </option>
-                    ))}
-                  </select>
+              <div className="analysis-card">
+                <div className="card-header">
+                  <h3>Sector Comparison</h3>
                 </div>
-
-              {dcfLoading && (
-                <div className="loading-message">
-                  <p>Loading DCF analysis...</p>
+                <p>Compare financial metrics with peers from the same industry sector.</p>
+                <button className="analysis-btn" onClick={() => alert('Sector comparison coming soon!')}>
+                  Compare
+                </button>
+              </div>
+              
+              <div className="analysis-card">
+                <div className="card-header">
+                  <h3>Technical Analysis</h3>
                 </div>
-              )}
-
-              {dcfError && (
-                <div className="error-message">
-                  <p>Error: {dcfError}</p>
+                <p>Study trends, support, resistance and technical indicators.</p>
+                <button className="analysis-btn" onClick={() => alert('Technical analysis coming soon!')}>
+                  Analyze
+                </button>
+              </div>
+              
+              <div className="analysis-card">
+                <div className="card-header">
+                  <h3>Detailed Report</h3>
                 </div>
-              )}
-
-              {valuationData && (
-                <div className="dcf-results">
-                  <div className="scenario-cards">
-                    <div className="scenario-card optimistic">
-                      <h3>Optimistic Scenario</h3>
-                      <div className="scenario-content">
-                        <div className="metric">
-                          <span className="label">Fair Value:</span>
-                          <span className="value">{formatSharePrice(valuationData.optimistic_scenario?.fair_value)}</span>
-                        </div>
-                        <div className="metric">
-                          <span className="label">Revenue Growth:</span>
-                          <span className="value">{formatPercent(valuationData.optimistic_scenario?.revenue_growth_rate)}</span>
-                        </div>
-                        <div className="metric">
-                          <span className="label">WACC:</span>
-                          <span className="value">{formatPercent(valuationData.optimistic_scenario?.wacc)}</span>
-                        </div>
-                        <div className="metric">
-                          <span className="label">Terminal Growth:</span>
-                          <span className="value">{formatPercent(valuationData.optimistic_scenario?.terminal_growth_rate)}</span>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="scenario-card conservative">
-                      <h3>Conservative Scenario</h3>
-                      <div className="scenario-content">
-                        <div className="metric">
-                          <span className="label">Fair Value:</span>
-                          <span className="value">{formatSharePrice(valuationData.conservative_scenario?.fair_value)}</span>
-                        </div>
-                        <div className="metric">
-                          <span className="label">Revenue Growth:</span>
-                          <span className="value">{formatPercent(valuationData.conservative_scenario?.revenue_growth_rate)}</span>
-                        </div>
-                        <div className="metric">
-                          <span className="label">WACC:</span>
-                          <span className="value">{formatPercent(valuationData.conservative_scenario?.wacc)}</span>
-                        </div>
-                        <div className="metric">
-                          <span className="label">Terminal Growth:</span>
-                          <span className="value">{formatPercent(valuationData.conservative_scenario?.terminal_growth_rate)}</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="base-data-section">
-                    <h3>Base Financial Data</h3>
-                    <div className="base-data-grid">
-                      <div className="base-metric">
-                        <span className="label">Current Revenue:</span>
-                        <span className="value">{formatCurrency(valuationData.base_data?.current_revenue)}</span>
-                      </div>
-                      <div className="base-metric">
-                        <span className="label">Free Cash Flow:</span>
-                        <span className="value">{formatCurrency(valuationData.base_data?.free_cash_flow)}</span>
-                      </div>
-                      <div className="base-metric">
-                        <span className="label">Shares Outstanding:</span>
-                        <span className="value">{valuationData.base_data?.shares_outstanding ? `${(valuationData.base_data.shares_outstanding / 1000000).toFixed(0)}M` : 'N/A'}</span>
-                      </div>
-                      <div className="base-metric">
-                        <span className="label">Current Stock Price:</span>
-                        <span className="value">{formatSharePrice(valuationData.base_data?.current_stock_price)}</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              )}
+                <p>Generate a comprehensive report with all metrics and analyses.</p>
+                <button className="analysis-btn" onClick={() => alert('Detailed report coming soon!')}>
+                  Generate
+                </button>
+              </div>
             </div>
           </div>
         )}
