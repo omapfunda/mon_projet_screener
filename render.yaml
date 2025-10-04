@@ -19,7 +19,7 @@ services:
     name: screener-frontend
     env: node
     plan: free
-    buildCommand: npm ci && npm run build:production
+    buildCommand: npm ci && npm run build
     startCommand: npm start
     envVars:
       - key: NODE_ENV
