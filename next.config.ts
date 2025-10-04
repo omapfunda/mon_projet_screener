@@ -1,10 +1,10 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  // Optimisations pour la production
-  experimental: {
-    optimizeCss: true,
-  },
+  // Optimisations pour la production - disabled for deployment compatibility
+  // experimental: {
+  //   optimizeCss: true,
+  // },
   
   // Configuration des variables d'environnement
   env: {
