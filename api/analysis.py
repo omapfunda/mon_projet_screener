@@ -5,6 +5,9 @@ import pandas as pd
 import numpy as np
 from stockdex import Ticker as StockdexTicker
 import requests
+import time
+from datetime import datetime
+from database import db_manager, cache_manager, cache_api_response, get_cache_key
 
 # --- Configurations ---
 INDEX_CONFIG = {
@@ -20,6 +23,12 @@ def get_index_symbols(index_name: str) -> list:
     if index_name not in INDEX_CONFIG:
         print(f"Erreur: L'indice '{index_name}' n'est pas dans INDEX_CONFIG.")
         return []
+    
+    # Vérifier le cache en base de données d'abord
+    cached_symbols = db_manager.get_cached_index_symbols(index_name, max_age_hours=24)
+    if cached_symbols:
+        print(f"Symboles récupérés du cache pour {index_name}")
+        return cached_symbols
     
     config = INDEX_CONFIG[index_name]
     
@@ -55,7 +64,11 @@ def get_index_symbols(index_name: str) -> list:
                 final_symbols.append(t + config['suffix'])
             else:
                 final_symbols.append(t)
-                
+        
+        # Sauvegarder en cache
+        db_manager.cache_index_symbols(index_name, final_symbols)
+        print(f"Symboles mis en cache pour {index_name}: {len(final_symbols)} symboles")
+        
         return final_symbols
         
     except Exception as e:
@@ -71,6 +84,8 @@ MARKET_RETURN = 0.085 # Hypothèse de retour moyen du marché (S&P 500 historiqu
 
 def perform_screening(index_name: str, criteria: dict) -> list:
     """Orchestre le processus de screening complet."""
+    start_time = time.time()
+    
     symbols = get_index_symbols(index_name)
     if not symbols:
         return []
@@ -85,10 +100,25 @@ def perform_screening(index_name: str, criteria: dict) -> list:
     
     # Trier les résultats par score décroissant
     all_results.sort(key=lambda x: x['score'], reverse=True)
+    
+    # Sauvegarder les résultats en base
+    execution_time = time.time() - start_time
+    try:
+        screening_id = db_manager.save_screening_result(
+            index_name=index_name,
+            criteria=criteria,
+            results=all_results,
+            execution_time=execution_time
+        )
+        print(f"Screening sauvegardé avec l'ID {screening_id} - Temps d'exécution: {execution_time:.2f}s")
+    except Exception as e:
+        print(f"Erreur lors de la sauvegarde du screening: {e}")
+    
     return all_results
 
 
 
+@cache_api_response
 def get_stock_data(symbol: str) -> dict:
     """Récupère les données financières clés pour un symbole."""
     try:

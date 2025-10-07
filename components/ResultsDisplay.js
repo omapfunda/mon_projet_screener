@@ -1,13 +1,8 @@
 "use client";
 import { useState } from 'react';
-import dynamic from 'next/dynamic';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
-const Plot = dynamic(
-  () => import('react-plotly.js'),
-  { ssr: false }
-);
-
-// Fonction utilitaire pour le téléchargement CSV (inchangée)
+// Utility function for CSV download (unchanged)
 const downloadCSV = (data) => {
   if (!data || data.length === 0) return;
   const headers = Object.keys(data[0]).join(',');
@@ -24,20 +19,20 @@ const downloadCSV = (data) => {
 };
 
 export default function ResultsDisplay({ results }) {
-  // --- NOUVELLE LOGIQUE DE PAGINATION ---
+  // --- NEW PAGINATION LOGIC ---
   const [currentPage, setCurrentPage] = useState(1);
   const ITEMS_PER_PAGE = 10;
 
   if (!results || results.length === 0) {
-    return <p>Aucun résultat à afficher.</p>;
+    return <p>No results to display.</p>;
   }
 
-  // Calculs pour la pagination
+  // Pagination calculations
   const totalPages = Math.ceil(results.length / ITEMS_PER_PAGE);
   const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
   const endIndex = startIndex + ITEMS_PER_PAGE;
   const paginatedResults = results.slice(startIndex, endIndex);
-  // --- FIN DE LA LOGIQUE DE PAGINATION ---
+  // --- END OF PAGINATION LOGIC ---
 
   const currencySymbol = results[0]?.currency === 'EUR' ? '€' : '$';
   const top10 = results.slice(0, 10);
@@ -50,61 +45,103 @@ export default function ResultsDisplay({ results }) {
     <>
       <div className="kpi-grid">
         <div className="kpi-card">
-          <div className="label">Actions Analysées</div>
+          <div className="label">Stocks Analyzed</div>
           <div className="value">{results.length}</div>
         </div>
         <div className="kpi-card">
-          <div className="label">Sous-évaluées (selon Graham)</div>
+          <div className="label">Undervalued (according to Graham)</div>
           <div className="value">{undervaluedCount}</div>
         </div>
         <div className="kpi-card">
-          <div className="label">Score Moyen</div>
+          <div className="label">Average Score</div>
           <div className="value">{(results.map(s=>s.score).reduce((a,b)=>a+b,0) / results.length).toFixed(1)}%</div>
         </div>
       </div>
 
       <div className="card">
-        <h3>Top 10 des Actions par Score</h3>
+        <h3>Top 10 Stocks by Score</h3>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '2rem' }}>
-          <Plot
-              data={[{ x: top10.map(s => s.company_name), y: top10.map(s => s.score), type: 'bar', marker: {color: 'var(--primary-color)'} }]}
-              layout={{ title: 'Score de Valeur', xaxis: {tickangle: -30}, yaxis: {ticksuffix: '%'}}}
-              style={{ width: '100%', height: '400px' }} use_container_width={true}
-          />
-          <Plot
-              data={[
-                  { x: top10.map(s => s.company_name), y: top10.map(s => s.current_price), name: 'Prix Actuel', type: 'bar' },
-                  { x: top10.map(s => s.company_name), y: top10.map(s => s.intrinsic_value), name: 'Valeur Intrinsèque', type: 'bar' },
-              ]}
-              layout={{ title: 'Prix Actuel vs. Valeur Intrinsèque', barmode: 'group', xaxis: {tickangle: -30}, yaxis: {ticksuffix: currencySymbol, tickprefix: currencySymbol}}}
-              style={{ width: '100%', height: '400px' }} use_container_width={true}
-          />
+          <div>
+            <h4 style={{ textAlign: 'center', marginBottom: '1rem', color: 'var(--text-secondary)' }}>Value Score</h4>
+            <ResponsiveContainer width="100%" height={400}>
+              <BarChart data={top10.map(s => ({ name: s.company_name, score: s.score }))}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                <XAxis 
+                  dataKey="name" 
+                  angle={-30} 
+                  textAnchor="end" 
+                  height={100}
+                  fontSize={12}
+                />
+                <YAxis 
+                  tickFormatter={(value) => `${value}%`}
+                  fontSize={12}
+                />
+                <Tooltip 
+                  formatter={(value) => [`${value}%`, 'Score']}
+                  labelStyle={{ color: '#333' }}
+                />
+                <Bar dataKey="score" fill="#367bf5" radius={[4, 4, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+          
+          <div>
+            <h4 style={{ textAlign: 'center', marginBottom: '1rem', color: 'var(--text-secondary)' }}>Current Price vs. Intrinsic Value</h4>
+            <ResponsiveContainer width="100%" height={400}>
+              <BarChart data={top10.map(s => ({ 
+                name: s.company_name, 
+                currentPrice: s.current_price, 
+                intrinsicValue: s.intrinsic_value 
+              }))}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                <XAxis 
+                  dataKey="name" 
+                  angle={-30} 
+                  textAnchor="end" 
+                  height={100}
+                  fontSize={12}
+                />
+                <YAxis 
+                  tickFormatter={(value) => `${currencySymbol}${value}`}
+                  fontSize={12}
+                />
+                <Tooltip 
+                  formatter={(value, name) => [`${currencySymbol}${value?.toFixed(2) || 'N/A'}`, name]}
+                  labelStyle={{ color: '#333' }}
+                />
+                <Legend />
+                <Bar dataKey="currentPrice" fill="#367bf5" name="Current Price" radius={[2, 2, 0, 0]} />
+                <Bar dataKey="intrinsicValue" fill="#10b981" name="Intrinsic Value" radius={[2, 2, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
         </div>
       </div>
       
       <div className="card">
               <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
-                <h3>Résultats Détaillés du Screening</h3>
-                <button onClick={() => downloadCSV(results)} className="secondary-button">Télécharger en CSV</button>
+                <h3>Detailed Screening Results</h3>
+                <button onClick={() => downloadCSV(results)} className="secondary-button">Download as CSV</button>
               </div>
               <div className="results-table-wrapper">
                 <table className="results-table">
                   <thead>
                     <tr>
-                      <th>Entreprise</th>
+                      <th>Company</th>
                       <th className="text-right">Score</th>
-                      <th className="text-right">Prix Actuel</th>
-                      <th className="text-right">Val. Intrinsèque</th>
-                      <th className="text-right">Marge Séc.</th>
+                      <th className="text-right">Current Price</th>
+                      <th className="text-right">Intrinsic Value</th>
+                      <th className="text-right">Safety Margin</th>
                       <th className="text-right">P/E</th>
                       <th className="text-right">P/B</th>
-                      <th className="text-right">Dette/FP</th>
+                      <th className="text-right">Debt/Equity</th>
                       <th className="text-right">ROE</th>
-                      <th className="text-right">Dividende</th>
+                      <th className="text-right">Dividend</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {/* Le .map() utilise maintenant les données paginées */}
+                    {/* The .map() now uses paginated data */}
                     {paginatedResults.map(stock => {
                       const margin = stock.intrinsic_value ? (stock.intrinsic_value - stock.current_price) / stock.current_price : null;
                       return (
@@ -126,20 +163,20 @@ export default function ResultsDisplay({ results }) {
                 </table>
               </div>
               
-              {/* --- NOUVEAUX CONTRÔLES DE PAGINATION --- */}
+              {/* --- NEW PAGINATION CONTROLS --- */}
               <div className="pagination-controls">
                 <button onClick={() => setCurrentPage(prev => prev - 1)} disabled={currentPage === 1} className="secondary-button">
-                  Précédent
+                  Previous
                 </button>
-                <span>Page {currentPage} sur {totalPages}</span>
+                <span>Page {currentPage} of {totalPages}</span>
                 <button onClick={() => setCurrentPage(prev => prev + 1)} disabled={currentPage === totalPages} className="secondary-button">
-                  Suivant
+                  Next
                 </button>
               </div>
-              {/* --- FIN DES CONTRÔLES DE PAGINATION --- */}
+              {/* --- END OF PAGINATION CONTROLS --- */}
             </div>
             <style jsx>{`
-              /* ... (styles jsx existants) ... */
+              /* ... (existing jsx styles) ... */
               .pagination-controls {
                 display: flex;
                 justify-content: space-between;

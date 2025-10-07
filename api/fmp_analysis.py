@@ -1,9 +1,17 @@
 import requests
 import pandas as pd
 import numpy as np
+import os
+from dotenv import load_dotenv
 
-# Remplacez par votre clé API FMP
-API_KEY = "a1d66629cb980dee92a9d18b4feb0a87"  # IMPORTANT: Replace with your actual API key
+# Chargement des variables d'environnement
+load_dotenv()
+
+# Récupération sécurisée de la clé API depuis les variables d'environnement
+API_KEY = os.getenv("FINANCIAL_MODELING_PREP_API_KEY")
+if not API_KEY:
+    raise ValueError("FINANCIAL_MODELING_PREP_API_KEY non trouvée dans les variables d'environnement. Veuillez configurer votre fichier .env")
+
 BASE_URL = "https://financialmodelingprep.com/api/v3"
 
 INDEX_CONFIG = {

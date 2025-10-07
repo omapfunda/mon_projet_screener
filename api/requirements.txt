@@ -18,6 +18,13 @@ lxml
 # Pydantic est une dépendance de FastAPI, mais il est bon de l'expliciter
 pydantic
 
+# Base de données et cache
+redis
+python-dotenv
+
+# Gestion des variables d'environnement
+python-dotenv
+
 requests
 
 # Bibliothèque pour le scraping de données financières

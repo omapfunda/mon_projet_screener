@@ -203,7 +203,7 @@ Write-Host "1. Tester manuellement l'interface utilisateur" -ForegroundColor Whi
 Write-Host "2. Vérifier les logs des services" -ForegroundColor White
 Write-Host "3. Effectuer un screening complet" -ForegroundColor White
 Write-Host "4. Tester l'export CSV" -ForegroundColor White
-Write-Host "5. Vérifier les graphiques Plotly" -ForegroundColor White
+Write-Host "5. Vérifier les graphiques Recharts" -ForegroundColor White
 
 if ($successCount -lt $totalTests) {
     Write-Host ""

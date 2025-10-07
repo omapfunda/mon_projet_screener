@@ -149,7 +149,7 @@ echo "1. Tester manuellement l'interface utilisateur"
 echo "2. Vérifier les logs des services"
 echo "3. Effectuer un screening complet"
 echo "4. Tester l'export CSV"
-echo "5. Vérifier les graphiques Plotly"
+echo "5. Vérifier les graphiques Recharts"
 
 # Nettoyer les fichiers temporaires
 rm -f /tmp/response.txt /tmp/cors_response.txt

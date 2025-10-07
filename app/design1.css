@@ -371,6 +371,147 @@
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
 }
 
+/* Screening Layout */
+.screening-layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 3rem;
+  max-width: 1200px;
+  margin: 0 auto;
+  text-align: left;
+}
+
+.screening-controls {
+  background: #ffffff;
+  padding: 2rem;
+  border-radius: 16px;
+  border: 1px solid #cccccc;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+}
+
+.metrics-description {
+  background: #ffffff;
+  padding: 2rem;
+  border-radius: 16px;
+  border: 1px solid #cccccc;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+}
+
+.metrics-header h3 {
+  color: #333333;
+  font-size: 1.4rem;
+  font-weight: 700;
+  margin-bottom: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.metric-item {
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.metric-item:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+}
+
+.metric-item h4 {
+  color: #333333;
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.metric-item p {
+  color: #666666;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  margin: 0;
+}
+
+.scoring-section {
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 2px solid #f0f0f0;
+}
+
+.scoring-section h3 {
+  color: #333333;
+  font-size: 1.2rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+}
+
+.scoring-section p {
+  color: #666666;
+  font-size: 0.9rem;
+  margin-bottom: 1.5rem;
+  line-height: 1.5;
+}
+
+.score-ranges {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.score-range {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.score-range.excellent {
+  background: #d4edda;
+  color: #155724;
+  border: 1px solid #c3e6cb;
+}
+
+.score-range.good {
+  background: #cce7ff;
+  color: #004085;
+  border: 1px solid #b3d7ff;
+}
+
+.score-range.average {
+  background: #fff3cd;
+  color: #856404;
+  border: 1px solid #ffeaa7;
+}
+
+.score-range.below-average {
+  background: #f8d7da;
+  color: #721c24;
+  border: 1px solid #f5c6cb;
+}
+
+.score-label {
+  font-weight: 600;
+}
+
+.score-value {
+  font-weight: 700;
+}
+
+/* Responsive Design for Screening Layout */
+@media (max-width: 768px) {
+  .screening-layout {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+  
+  .metrics-description {
+    order: -1;
+  }
+}
+
 /* Section Résultats */
 .results-section {
   space-y: 2rem;
