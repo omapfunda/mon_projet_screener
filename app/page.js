@@ -2,9 +2,11 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Link from "next/link";
 import { fetchIndices, runScreening, fetchDcfValuation } from "../lib/api";
 import ResultsDisplay from "../components/ResultsDisplay";
 import ScreeningHistory from "../components/ScreeningHistory";
+import AdvancedAnalysis from "../components/AdvancedAnalysis";
 import "./design1.css";
 
 const styles = {
@@ -314,6 +316,11 @@ export default function Home() {
         </div>
 
         <nav className="sidebar-nav">
+          <Link href="/homepage" className="nav-item" style={{textDecoration: 'none', color: 'inherit'}}>
+            {!sidebarCollapsed && <span className="nav-label">🏠 Homepage</span>}
+            {sidebarCollapsed && <span className="nav-label">🏠</span>}
+          </Link>
+          
           <button 
             className={`nav-item ${activeTab === 'screening' && !showResults && !showAnalysis ? 'active' : ''}`}
             onClick={() => showSection('screening')}
@@ -365,7 +372,7 @@ export default function Home() {
                 </>
               ) : (
                 <>
-                  Screening Configuration
+                  Stock Screening 
                 </>
               )}
             </h1>
@@ -567,7 +574,7 @@ export default function Home() {
           
           {activeTab === 'screening' && showAnalysis && screeningResults && screeningResults.length === 0 && (
             <div className="analysis-section">
-              <h2>Step 2: DCF Valuation</h2>
+              <h2>DCF Valuation</h2>
               <div className="info-message">
                 <p>No stocks found in the screening results.</p>
                 <p>Please adjust your screening criteria to find stocks for DCF analysis.</p>
@@ -582,112 +589,12 @@ export default function Home() {
           )}
           
           {activeTab === 'screening' && showAnalysis && screeningResults && screeningResults.length > 0 && (
-            <div className="analysis-section">
-              <h2>DCF Analysis</h2>
-              
-              <div className="dcf-container">
-                <div className="dcf-input-section">
-                  <label htmlFor="stock-select">Select a stock from screening results for DCF analysis:</label>
-                  <select 
-                    id="stock-select" 
-                    onChange={(e) => handleDcfAnalysis(e.target.value)}
-                    disabled={dcfLoading}
-                  >
-                    <option value="">-- Select a stock --</option>
-                    {screeningResults.map((stock, index) => (
-                      <option key={index} value={stock.symbol}>
-                        {stock.company_name} ({stock.symbol})
-                      </option>
-                    ))}
-                  </select>
-                </div>
+            <AdvancedAnalysis results={screeningResults} />
+          )}
 
-              {dcfLoading && (
-                <div className="loading-message">
-                  <p>Loading DCF analysis...</p>
-                </div>
-              )}
-
-              {dcfError && (
-                <div className="error-message">
-                  <p>Error: {dcfError}</p>
-                </div>
-              )}
-
-              {valuationData && (
-                <div className="dcf-results">
-                  <div className="scenario-cards">
-                    <div className="scenario-card optimistic">
-                      <h3>Optimistic Scenario</h3>
-                      <div className="scenario-content">
-                        <div className="metric">
-                          <span className="label">Fair Value:</span>
-                          <span className="value">{formatSharePrice(valuationData.optimistic_scenario?.fair_value)}</span>
-                        </div>
-                        <div className="metric">
-                          <span className="label">Revenue Growth:</span>
-                          <span className="value">{formatPercent(valuationData.optimistic_scenario?.revenue_growth_rate)}</span>
-                        </div>
-                        <div className="metric">
-                          <span className="label">WACC:</span>
-                          <span className="value">{formatPercent(valuationData.optimistic_scenario?.wacc)}</span>
-                        </div>
-                        <div className="metric">
-                          <span className="label">Terminal Growth:</span>
-                          <span className="value">{formatPercent(valuationData.optimistic_scenario?.terminal_growth_rate)}</span>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="scenario-card conservative">
-                      <h3>Conservative Scenario</h3>
-                      <div className="scenario-content">
-                        <div className="metric">
-                          <span className="label">Fair Value:</span>
-                          <span className="value">{formatSharePrice(valuationData.conservative_scenario?.fair_value)}</span>
-                        </div>
-                        <div className="metric">
-                          <span className="label">Revenue Growth:</span>
-                          <span className="value">{formatPercent(valuationData.conservative_scenario?.revenue_growth_rate)}</span>
-                        </div>
-                        <div className="metric">
-                          <span className="label">WACC:</span>
-                          <span className="value">{formatPercent(valuationData.conservative_scenario?.wacc)}</span>
-                        </div>
-                        <div className="metric">
-                          <span className="label">Terminal Growth:</span>
-                          <span className="value">{formatPercent(valuationData.conservative_scenario?.terminal_growth_rate)}</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="base-data-section">
-                    <h3>Base Financial Data</h3>
-                    <div className="base-data-grid">
-                      <div className="base-metric">
-                        <span className="label">Current Revenue:</span>
-                        <span className="value">{formatCurrency(valuationData.base_data?.current_revenue)}</span>
-                      </div>
-                      <div className="base-metric">
-                        <span className="label">Free Cash Flow:</span>
-                        <span className="value">{formatCurrency(valuationData.base_data?.free_cash_flow)}</span>
-                      </div>
-                      <div className="base-metric">
-                        <span className="label">Shares Outstanding:</span>
-                        <span className="value">{valuationData.base_data?.shares_outstanding ? `${(valuationData.base_data.shares_outstanding / 1000000).toFixed(0)}M` : 'N/A'}</span>
-                      </div>
-                      <div className="base-metric">
-                        <span className="label">Current Stock Price:</span>
-                        <span className="value">{formatSharePrice(valuationData.base_data?.current_stock_price)}</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-        )}
+          {activeTab === 'screening' && showAnalysis && (!screeningResults || screeningResults.length === 0) && (
+            <AdvancedAnalysis results={[]} />
+          )}
       </main>
     </div>
   );

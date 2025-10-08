@@ -133,24 +133,30 @@ def get_dcf_valuation(ticker: str):
     if "error" in valuation_results:
         raise HTTPException(status_code=404, detail=f"L'analyse DCF a échoué pour {ticker}: {valuation_results['error']}")
     
-    # Transform data to match frontend expectations
-    transformed_data = {
-        "base_data": valuation_results.get("base_data", {}),
-        "optimistic_scenario": {
-            "fair_value": valuation_results.get("scenario1", {}).get("intrinsic_value"),
-            "revenue_growth_rate": valuation_results.get("scenario1", {}).get("assumptions", {}).get("fcf_growth"),
-            "wacc": 0.10,  # Default WACC value
-            "terminal_growth_rate": valuation_results.get("scenario1", {}).get("assumptions", {}).get("perp_growth")
-        },
-        "conservative_scenario": {
-            "fair_value": valuation_results.get("scenario2", {}).get("intrinsic_value"),
-            "revenue_growth_rate": valuation_results.get("scenario2", {}).get("assumptions", {}).get("fcf_growth"),
-            "wacc": 0.10,  # Default WACC value
-            "terminal_growth_rate": valuation_results.get("scenario2", {}).get("assumptions", {}).get("perp_growth")
-        }
-    }
+    # Fetch real-time data using the existing analysis function
+    stock_data = analysis.get_stock_data(ticker)
+    current_price = stock_data.get('current_price') if stock_data else None
+
+    # Add current price and additional fields needed by frontend
+    enhanced_data = valuation_results.copy()
     
-    return transformed_data
+    # Add missing fields for frontend compatibility
+    if "scenario1" in enhanced_data:
+        enhanced_data["scenario1"]["revenue_growth"] = enhanced_data["scenario1"]["assumptions"]["fcf_growth"]
+        enhanced_data["scenario1"]["ebitda_margin"] = 0.15  # Default value
+        enhanced_data["scenario1"]["discount_rate"] = 0.10  # Default WACC
+        enhanced_data["scenario1"]["terminal_growth"] = enhanced_data["scenario1"]["assumptions"]["perp_growth"]
+    
+    if "scenario2" in enhanced_data:
+        enhanced_data["scenario2"]["revenue_growth"] = enhanced_data["scenario2"]["assumptions"]["fcf_growth"]
+        enhanced_data["scenario2"]["ebitda_margin"] = 0.15  # Default value
+        enhanced_data["scenario2"]["discount_rate"] = 0.10  # Default WACC
+        enhanced_data["scenario2"]["terminal_growth"] = enhanced_data["scenario2"]["assumptions"]["perp_growth"]
+    
+    # Add current price (placeholder - should be fetched from real-time data)
+    enhanced_data["current_price"] = current_price
+    
+    return enhanced_data
     
 @app.get("/financials/{ticker}", tags=["Analysis"])
 def get_stock_financials(ticker: str):

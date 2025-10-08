@@ -1,9 +1,5 @@
 {
-  "/favicon.ico/route": "app/favicon.ico/route.js",
-  "/design1-prototype/page": "app/design1-prototype/page.js",
-  "/prototype/page": "app/prototype/page.js",
+  "/_not-found/page": "app/_not-found/page.js",
   "/page": "app/page.js",
-  "/test-design4/page": "app/test-design4/page.js",
-  "/design3-prototype/page": "app/design3-prototype/page.js",
-  "/_not-found/page": "app/_not-found/page.js"
+  "/homepage/page": "app/homepage/page.js"
 }
