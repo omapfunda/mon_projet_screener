@@ -164,6 +164,44 @@ class DatabaseManager:
                 return json.loads(row['symbols'])
             return None
 
+    def add_to_watchlist(self, user_id: str, ticker: str, notes: Optional[str] = None) -> int:
+        """Ajoute un ticker à la watchlist d'un utilisateur"""
+        with self.get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("""
+                INSERT INTO watchlists (user_id, ticker, notes)
+                VALUES (?, ?, ?)
+            """, (user_id, ticker, notes))
+            conn.commit()
+            return cursor.lastrowid
+
+    def remove_from_watchlist(self, watchlist_id: int) -> bool:
+        """Supprime un élément de la watchlist par son ID"""
+        with self.get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("DELETE FROM watchlists WHERE id = ?", (watchlist_id,))
+            conn.commit()
+            return cursor.rowcount > 0
+
+    def get_watchlist(self, user_id: str) -> List[Dict]:
+        """Récupère la watchlist d'un utilisateur"""
+        with self.get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("""
+                SELECT id, ticker, added_date, notes
+                FROM watchlists
+                WHERE user_id = ?
+                ORDER BY added_date DESC
+            """, (user_id,))
+            return [dict(row) for row in cursor.fetchall()]
+
+    def is_in_watchlist(self, user_id: str, ticker: str) -> bool:
+        """Vérifie si un ticker est déjà dans la watchlist de l'utilisateur"""
+        with self.get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("SELECT 1 FROM watchlists WHERE user_id = ? AND ticker = ?", (user_id, ticker))
+            return cursor.fetchone() is not None
+
 class CacheManager:
     """Gestionnaire de cache Redis pour les données temporaires"""
     

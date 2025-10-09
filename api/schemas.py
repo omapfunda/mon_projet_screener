@@ -1,7 +1,7 @@
 # Fichier : backend/app/schemas.py
 
 from pydantic import BaseModel, Field, field_validator
-from typing import Literal
+from typing import Literal, Optional
 
 class ScreeningRequest(BaseModel):
     """
@@ -82,3 +82,17 @@ class ScreeningRequest(BaseModel):
                 "roe_min": 0.12
             }
         }
+
+# --- Watchlist Schemas ---
+
+class WatchlistItem(BaseModel):
+    """Modèle pour un élément de la watchlist."""
+    id: int
+    ticker: str
+    added_date: str
+    notes: Optional[str] = None
+
+class AddToWatchlistRequest(BaseModel):
+    """Modèle pour une requête d'ajout à la watchlist."""
+    ticker: str = Field(..., min_length=1, max_length=10)
+    notes: Optional[str] = Field(None, max_length=500)

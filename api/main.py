@@ -3,6 +3,7 @@
 
 import os
 import json
+from typing import List
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.exceptions import RequestValidationError
@@ -197,6 +198,38 @@ def get_screening_history(limit: int = 20):
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Erreur lors de la récupération de l'historique: {str(e)}")
+
+# --- Watchlist Endpoints ---
+
+@app.get("/watchlist", tags=["Watchlist"], response_model=List[schemas.WatchlistItem])
+def get_watchlist(user_id: str = "default"):
+    """Récupère la watchlist pour un utilisateur donné."""
+    try:
+        watchlist_data = db_manager.get_watchlist(user_id)
+        return watchlist_data
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Erreur interne: {str(e)}")
+
+@app.post("/watchlist", tags=["Watchlist"], response_model=schemas.WatchlistItem)
+def add_to_watchlist(item: schemas.AddToWatchlistRequest, user_id: str = "default"):
+    """Ajoute un ticker à la watchlist."""
+    if db_manager.is_in_watchlist(user_id, item.ticker):
+        raise HTTPException(status_code=409, detail=f"{item.ticker} est déjà dans la watchlist.")
+    
+    try:
+        watchlist_id = db_manager.add_to_watchlist(user_id, item.ticker, item.notes)
+        # Récupérer l'objet complet pour la réponse
+        new_item = db_manager.get_watchlist(user_id) # Simplifié, idéalement récupérer par ID
+        return next((i for i in new_item if i['id'] == watchlist_id), None)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Erreur lors de l'ajout: {str(e)}")
+
+@app.delete("/watchlist/{item_id}", tags=["Watchlist"], status_code=204)
+def remove_from_watchlist(item_id: int):
+    """Supprime un élément de la watchlist."""
+    if not db_manager.remove_from_watchlist(item_id):
+        raise HTTPException(status_code=404, detail="Élément non trouvé dans la watchlist.")
+    return
 
 @app.get("/screening/history/{screening_id}", tags=["Screening"])
 def get_screening_details(screening_id: int):

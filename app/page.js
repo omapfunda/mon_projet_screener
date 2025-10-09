@@ -7,6 +7,7 @@ import { fetchIndices, runScreening, fetchDcfValuation } from "../lib/api";
 import ResultsDisplay from "../components/ResultsDisplay";
 import ScreeningHistory from "../components/ScreeningHistory";
 import AdvancedAnalysis from "../components/AdvancedAnalysis";
+import Watchlist from "../components/Watchlist"; // Import the Watchlist component
 import "./design1.css";
 
 const styles = {
@@ -113,13 +114,14 @@ const formatSharePrice = (num) => {
 
 export default function Home() {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-  const [activeTab, setActiveTab] = useState('screening'); // 'screening' ou 'history'
+  const [activeTab, setActiveTab] = useState('screening'); // 'screening', 'history', or 'watchlist'
   const [indices, setIndices] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [screeningResults, setScreeningResults] = useState(null);
   const [showResults, setShowResults] = useState(false);
   const [showAnalysis, setShowAnalysis] = useState(false);
+  const [analysisTicker, setAnalysisTicker] = useState(null);
   
   // État pour l'analyse DCF
   const [valuationData, setValuationData] = useState(null);
@@ -260,6 +262,10 @@ export default function Home() {
       setActiveTab('history');
       setShowResults(false);
       setShowAnalysis(false);
+    } else if (section === 'watchlist') {
+      setActiveTab('watchlist');
+      setShowResults(false);
+      setShowAnalysis(false);
     }
   };
 
@@ -349,6 +355,13 @@ export default function Home() {
           >
             {!sidebarCollapsed && <span className="nav-label">Historique</span>}
           </button>
+
+          <button 
+            className={`nav-item ${activeTab === 'watchlist' ? 'active' : ''}`}
+            onClick={() => showSection('watchlist')}
+          >
+            {!sidebarCollapsed && <span className="nav-label">Watchlist</span>}
+          </button>
         </nav>
 
 
@@ -358,7 +371,11 @@ export default function Home() {
       <main className="main-content">
         <header className="content-header">
           <h1 className="page-title" style={styles.pageTitle}>
-              {activeTab === 'history' ? (
+              {activeTab === 'watchlist' ? (
+                <>
+                  My Watchlist
+                </>
+              ) : activeTab === 'history' ? (
                 <>
                   Screening History
                 </>
@@ -377,7 +394,8 @@ export default function Home() {
               )}
             </h1>
           <p className="page-subtitle">
-            {activeTab === 'history' ? 'View your previous analysis and screening statistics' :
+            {activeTab === 'watchlist' ? 'Track your favorite stocks' :
+             activeTab === 'history' ? 'View your previous analysis and screening statistics' :
              showResults ? 'Discover the best investment opportunities' : 
              showAnalysis ? 'In-depth analysis tools for your investments' : 
              'Define your criteria to identify value stocks'}
@@ -388,6 +406,11 @@ export default function Home() {
           <div className="alert alert-error">
             <span>{error}</span>
           </div>
+        )}
+
+        {/* Section Watchlist */}
+        {activeTab === 'watchlist' && (
+          <Watchlist />
         )}
 
         {/* Section Historique */}
@@ -552,7 +575,15 @@ export default function Home() {
 
         {/* Results Section */}
         {activeTab === 'screening' && showResults && screeningResults && (
-          <ResultsDisplay results={screeningResults} />
+          <ResultsDisplay 
+            results={screeningResults} 
+            onGoToDcf={(ticker) => {
+              setAnalysisTicker(ticker);
+              setShowResults(false);
+              setShowAnalysis(true);
+              setActiveTab('screening'); // Ensure we're on the screening tab
+            }}
+          />
         )}
 
         {/* Analysis Section */}
@@ -589,11 +620,11 @@ export default function Home() {
           )}
           
           {activeTab === 'screening' && showAnalysis && screeningResults && screeningResults.length > 0 && (
-            <AdvancedAnalysis results={screeningResults} />
+            <AdvancedAnalysis results={screeningResults} initialTicker={analysisTicker} />
           )}
 
           {activeTab === 'screening' && showAnalysis && (!screeningResults || screeningResults.length === 0) && (
-            <AdvancedAnalysis results={[]} />
+            <AdvancedAnalysis results={[]} initialTicker={analysisTicker} />
           )}
       </main>
     </div>
