@@ -49,7 +49,7 @@ class ScreeningRequest(BaseModel):
         # Liste des indices autorisés pour la sécurité (synchronisée avec analysis.py)
         allowed_indices = [
             'CAC 40 (France)', 'S&P 500 (USA)', 'NASDAQ 100 (USA)', 
-            'DAX (Germany)', 'Dow Jones (USA)'
+            'DAX (Germany)', 'Dow Jones (USA)', 'Russell 2000 (USA)'
         ]
         
         if v not in allowed_indices:

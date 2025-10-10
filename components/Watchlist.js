@@ -57,25 +57,25 @@ const Watchlist = () => {
             : { background: '#fff3cd', color: '#664d03', border: '1px solid #ffe69c', padding: '8px', borderRadius: '6px', marginTop: '0.5rem' })
         : {};
 
-    if (loading) return <div className="card" style={{ padding: '1rem' }}>Chargement de la watchlist...</div>;
-    if (error) return <div className="card" style={{ padding: '1rem', background: '#fff3cd', border: '1px solid #ffe69c' }}>Erreur: {error}</div>;
+    if (loading) return <div className="card" style={{ padding: '1rem' }}>Loading watchlist...</div>;
+    if (error) return <div className="card" style={{ padding: '1rem', background: '#fff3cd', border: '1px solid #ffe69c' }}>Error: {error}</div>;
 
     return (
         <div className="card watchlist-container" style={{ padding: '1rem' }}>
             <div className="card-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <h2 style={{ margin: 0 }}>Ma Watchlist</h2>
+                <h2 style={{ margin: 0 }}>My Watchlist</h2>
                 <div className="card-actions" style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
                     <input
                         type="text"
-                        placeholder="Filtrer par ticker..."
+                        placeholder="Filter by ticker..."
                         value={filterText}
                         onChange={(e) => setFilterText(e.target.value)}
                         style={{ padding: '0.4rem 0.6rem', borderRadius: '6px', border: '1px solid #ccc' }}
                     />
                     <button className="btn-primary" onClick={() => setSortAsc((prev) => !prev)}>
-                        Trier: {sortAsc ? 'Plus ancien' : 'Plus récent'}
+                        Sort: {sortAsc ? 'Oldest' : 'Newest'}
                     </button>
-                    <button className="btn-primary" onClick={fetchWatchlist}>Actualiser</button>
+                    <button className="btn-primary" onClick={fetchWatchlist}>Refresh</button>
                 </div>
             </div>
 
@@ -84,13 +84,13 @@ const Watchlist = () => {
             )}
 
             {displayedItems.length === 0 ? (
-                <p style={{ marginTop: '1rem' }}>Votre watchlist est vide.</p>
+                <p style={{ marginTop: '1rem' }}>Your watchlist is empty.</p>
             ) : (
                 <table style={{ width: '100%', marginTop: '1rem' }}>
                     <thead>
                         <tr>
                             <th style={{ textAlign: 'left' }}>Ticker</th>
-                            <th style={{ textAlign: 'left' }}>Date d'ajout</th>
+                            <th style={{ textAlign: 'left' }}>Date Added</th>
                             <th style={{ textAlign: 'left' }}>Actions</th>
                         </tr>
                     </thead>
@@ -100,7 +100,7 @@ const Watchlist = () => {
                                 <td>{item.ticker}</td>
                                 <td>{new Date(item.added_date).toLocaleDateString()}</td>
                                 <td>
-                                    <button className="btn-primary" onClick={() => handleRemove(item.id, item.ticker)}>Supprimer</button>
+                                    <button className="btn-primary" onClick={() => handleRemove(item.id, item.ticker)}>Remove</button>
                                 </td>
                             </tr>
                         ))}

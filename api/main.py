@@ -260,6 +260,18 @@ def get_screening_details(screening_id: int):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Erreur lors de la récupération du screening: {str(e)}")
 
+@app.delete("/screening/history/{screening_id}", tags=["Screening"], status_code=204)
+def delete_screening(screening_id: int):
+    """
+    Supprime un screening de l'historique.
+    """
+    try:
+        if not db_manager.delete_screening(screening_id):
+            raise HTTPException(status_code=404, detail=f"Screening {screening_id} non trouvé")
+        return
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Erreur lors de la suppression du screening: {str(e)}")
+
 @app.delete("/cache/clear", tags=["Cache"])
 def clear_cache():
     """

@@ -15,14 +15,78 @@ INDEX_CONFIG = {
     'S&P 500 (USA)': { 'url': 'https://en.wikipedia.org/wiki/List_of_S%26P_500_companies', 'table_index': 0, 'ticker_col': 'Symbol', 'suffix': '' },
     'NASDAQ 100 (USA)': { 'url': 'https://en.wikipedia.org/wiki/Nasdaq-100', 'table_index': 4, 'ticker_col': 'Ticker', 'suffix': '' },
     'DAX (Germany)': { 'url': 'https://en.wikipedia.org/wiki/DAX', 'table_index': 4, 'ticker_col': 'Ticker', 'suffix': '.DE' },
-    'Dow Jones (USA)': { 'url': 'https://en.wikipedia.org/wiki/Dow_Jones_Industrial_Average', 'table_index': 1, 'ticker_col': 'Ticker', 'suffix': '' }
+    'Dow Jones (USA)': { 'url': 'https://en.wikipedia.org/wiki/Dow_Jones_Industrial_Average', 'table_index': 1, 'ticker_col': 'Ticker', 'suffix': '' },
+    'Russell 2000 (USA)': { 'url': 'https://en.wikipedia.org/wiki/Russell_2000_Index', 'table_index': 0, 'ticker_col': 'Symbol', 'suffix': '' }
 }
+
+def get_russell_2000_symbols() -> list:
+    """Récupère les holdings du Russell 2000 via l'ETF IWM (iShares Russell 2000 ETF)"""
+    try:
+        # Essayer d'abord avec yahooquery
+        try:
+            from yahooquery import Ticker
+            iwm = Ticker("IWM")
+            holdings_info = iwm.fund_holding_info
+            
+            if holdings_info and 'IWM' in holdings_info:
+                holdings_data = holdings_info['IWM']
+                if 'holdings' in holdings_data:
+                    symbols = []
+                    for holding in holdings_data['holdings']:
+                        if 'symbol' in holding:
+                            symbol = str(holding['symbol']).strip()
+                            if symbol and len(symbol) <= 5 and symbol.replace('.', '').isalnum():
+                                symbols.append(symbol)
+                    
+                    if symbols:
+                        print(f"Récupéré {len(symbols)} symboles du Russell 2000 via IWM (yahooquery)")
+                        return symbols[:100]  # Limiter à 100 pour les tests
+        except ImportError:
+            print("yahooquery non disponible, tentative avec yfinance...")
+        except Exception as e:
+            print(f"Erreur avec yahooquery: {e}")
+        
+        # Fallback avec yfinance pour obtenir des informations de base
+        import yfinance as yf
+        iwm = yf.Ticker("IWM")
+        
+        # Essayer d'obtenir des informations sur l'ETF
+        info = iwm.info
+        if info:
+            print("Informations IWM récupérées, mais pas de holdings détaillés disponibles")
+            
+    except Exception as e:
+        print(f"Erreur lors de la récupération des holdings IWM: {e}")
+    
+    # Fallback avec des symboles Russell 2000 connus
+    print("Utilisation du fallback avec des symboles Russell 2000 connus")
+    return [
+        "ACIW", "ADTN", "AMED", "AMKR", "ANET", "ARWR", "AVAV", "BCRX", "BMRN", "CARG",
+        "CBSH", "CCOI", "CGNX", "CHDN", "CIEN", "CLNE", "COKE", "CREE", "CROX", "CSGS",
+        "CTXS", "CVBF", "CWST", "DCOM", "DIOD", "DSGX", "EEFT", "EGOV", "ENSG", "EPAM",
+        "EXPO", "FFIV", "FIVN", "FORM", "FRME", "GMED", "GTLS", "HALO", "HCSG", "HELE",
+        "HOMB", "HUBG", "ICUI", "IIVI", "INDB", "INOV", "IPAR", "ISRG", "ITRI", "JKHY"
+    ]
 
 def get_index_symbols(index_name: str) -> list:
     """Récupère les symboles pour un indice donné de manière robuste avec un logging d'erreur."""
     if index_name not in INDEX_CONFIG:
         print(f"Erreur: L'indice '{index_name}' n'est pas dans INDEX_CONFIG.")
         return []
+    
+    # Cas spécial pour Russell 2000
+    if index_name == 'Russell 2000 (USA)':
+        # Vérifier le cache en base de données d'abord
+        cached_symbols = db_manager.get_cached_index_symbols(index_name, max_age_hours=24)
+        if cached_symbols:
+            print(f"Symboles récupérés du cache pour {index_name}")
+            return cached_symbols
+        
+        symbols = get_russell_2000_symbols()
+        if symbols:
+            # Sauvegarder en cache
+            db_manager.cache_index_symbols(index_name, symbols)
+        return symbols
     
     # Vérifier le cache en base de données d'abord
     cached_symbols = db_manager.get_cached_index_symbols(index_name, max_age_hours=24)

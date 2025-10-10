@@ -116,6 +116,16 @@ class DatabaseManager:
             
             return [dict(row) for row in cursor.fetchall()]
     
+    def delete_screening(self, screening_id: int) -> bool:
+        """Supprime un screening de l'historique"""
+        with self.get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("""
+                DELETE FROM screenings WHERE id = ?
+            """, (screening_id,))
+            conn.commit()
+            return cursor.rowcount > 0
+    
     def cache_financial_data(self, ticker: str, data: dict, source: str):
         """Met en cache les données financières"""
         with self.get_connection() as conn:
