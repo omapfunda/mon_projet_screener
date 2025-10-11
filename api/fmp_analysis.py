@@ -2,6 +2,7 @@ import pandas as pd
 import numpy as np
 from typing import Dict, Tuple, Optional
 from stockdex import Ticker
+from database import cache_api_response
 
 # Constantes de validation
 MIN_GROWTH_RATE = -0.50  # -50% minimum
@@ -375,9 +376,10 @@ def run_dcf_valuation(
     return intrinsic_value_per_share, enterprise_value, equity_value
 
 
+@cache_api_response(source="dcf_analysis")
 def get_dcf_analysis(ticker: str, wacc: Optional[float] = None) -> Dict:
     """
-    Fonction principale pour obtenir l'analyse DCF d'un ticker donné.
+    Effectue une analyse DCF complète pour un ticker donné.
     
     Args:
         ticker: Symbole boursier (ex: 'AAPL', 'MSFT')
