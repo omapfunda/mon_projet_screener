@@ -46,7 +46,7 @@ RUN CHROMEDRIVER_URL=$(curl -s https://googlechromelabs.github.io/chrome-for-tes
     && unzip /tmp/chromedriver.zip -d /usr/local/bin/ \
     && chmod +x /usr/local/bin/chromedriver-linux64/chromedriver \
     && mv /usr/local/bin/chromedriver-linux64/chromedriver /usr/local/bin/chromedriver \
-    && rmdir /usr/local/bin/chromedriver-linux64 \
+    && rm -rf /usr/local/bin/chromedriver-linux64 \
     && rm /tmp/chromedriver.zip \
     && echo "ChromeDriver installed at: $(which chromedriver)" \
     && chromedriver --version
