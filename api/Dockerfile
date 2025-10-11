@@ -28,10 +28,11 @@ RUN apt-get update && apt-get install -y \
     libappindicator1 \
     libnss3 \
     libgbm1 \
-    && wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | gpg --dearmor > /etc/apt/trusted.gpg.d/google-chrome.gpg \
-    && echo "deb [arch=amd64 signed-by=/etc/apt/trusted.gpg.d/google-chrome.gpg] http://dl.google.com/linux/chrome/deb/ stable main" > /etc/apt/sources.list.d/google-chrome.list \
+    && wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add - \
+    && echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" > /etc/apt/sources.list.d/google-chrome.list \
     && apt-get update \
-    && apt-get install -y google-chrome-stable \
+    && (apt-get install -y google-chrome-stable || apt-get install -y chromium-browser) \
+    && (google-chrome-stable --version || chromium-browser --version || echo "Browser installé") \
     && rm -rf /var/lib/apt/lists/*
 
 # Créer un utilisateur non-root pour la sécurité

@@ -13,10 +13,29 @@ sleep 2
 
 # Vérifier que Chrome est disponible
 echo "🔍 Vérification de Chrome..."
-if command -v google-chrome-stable &> /dev/null; then
-    echo "✅ Chrome trouvé: $(google-chrome-stable --version)"
-else
-    echo "❌ Chrome non trouvé!"
+CHROME_PATHS=(
+    "/usr/bin/google-chrome-stable"
+    "/usr/bin/google-chrome"
+    "/usr/bin/chromium-browser"
+    "/usr/bin/chromium"
+)
+
+CHROME_FOUND=false
+for chrome_path in "${CHROME_PATHS[@]}"; do
+    if [ -f "$chrome_path" ]; then
+        echo "✅ Chrome trouvé: $chrome_path"
+        echo "✅ Version: $($chrome_path --version 2>/dev/null || echo 'Version non disponible')"
+        CHROME_FOUND=true
+        break
+    fi
+done
+
+if [ "$CHROME_FOUND" = false ]; then
+    echo "❌ Chrome non trouvé dans les emplacements standards!"
+    echo "🔍 Recherche de Chrome dans le système..."
+    find /usr -name "*chrome*" -type f 2>/dev/null | head -5
+    echo "📋 Packages Chrome installés:"
+    dpkg -l | grep -i chrome || echo "Aucun package Chrome trouvé"
     exit 1
 fi
 
