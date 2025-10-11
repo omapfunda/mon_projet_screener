@@ -65,18 +65,45 @@ def get_optimized_chrome_options():
 
 def get_chrome_driver_path():
     """
-    Retourne le chemin vers le driver Chrome
+    Retourne le chemin vers le driver Chrome/Chromium
     """
     # Render utilise généralement chromedriver dans le PATH
-    return None  # Utilise le chromedriver du PATH
+    # Mais on peut aussi utiliser chromium-driver
+    import shutil
+    
+    # Essayer de trouver chromedriver ou chromium-driver
+    for driver_name in ['chromedriver', 'chromium-driver']:
+        driver_path = shutil.which(driver_name)
+        if driver_path:
+            print(f"✅ Driver trouvé: {driver_path}")
+            return driver_path
+    
+    print("⚠️  Aucun driver trouvé, utilisation du PATH par défaut")
+    return None  # Utilise le driver du PATH
 
 
 def create_optimized_driver():
     """
-    Crée un driver Chrome optimisé pour Render
+    Crée un driver Chrome/Chromium optimisé pour Render
     """
     try:
         chrome_options = get_optimized_chrome_options()
+        
+        # Détecter le binaire Chrome/Chromium
+        chrome_bin = os.environ.get('CHROME_BIN')
+        if chrome_bin and os.path.exists(chrome_bin):
+            chrome_options.binary_location = chrome_bin
+            print(f"✅ Utilisation du binaire: {chrome_bin}")
+        else:
+            # Essayer de trouver Chromium ou Chrome
+            import shutil
+            for binary_name in ['chromium', 'chromium-browser', 'google-chrome-stable', 'google-chrome']:
+                binary_path = shutil.which(binary_name)
+                if binary_path:
+                    chrome_options.binary_location = binary_path
+                    print(f"✅ Binaire trouvé: {binary_path}")
+                    break
+        
         driver_path = get_chrome_driver_path()
         
         if driver_path:
@@ -93,7 +120,7 @@ def create_optimized_driver():
         return driver
         
     except Exception as e:
-        print(f"❌ Erreur lors de la création du driver Chrome: {e}")
+        print(f"❌ Erreur lors de la création du driver Chrome/Chromium: {e}")
         raise
 
 

@@ -1,36 +1,36 @@
-# Dockerfile optimisé pour Render avec Chromium
+# Dockerfile alternatif pour Render avec Chromium
 FROM python:3.11-slim
 
 # Définir le répertoire de travail
 WORKDIR /app
 
 # Installer les dépendances système pour Chromium et Selenium
-RUN echo "=== Installation des dépendances système ===" \
-    && apt-get update \
-    && apt-get install -y \
-        wget \
-        gnupg \
-        unzip \
-        curl \
-        xvfb \
-        chromium \
-        chromium-driver \
-        fonts-liberation \
-        libappindicator3-1 \
-        libasound2 \
-        libatk-bridge2.0-0 \
-        libdrm2 \
-        libxcomposite1 \
-        libxdamage1 \
-        libxrandr2 \
-        libgbm1 \
-        libxss1 \
-        libnss3 \
-    && echo "=== Vérification de Chromium ===" \
+RUN apt-get update && apt-get install -y \
+    wget \
+    gnupg \
+    unzip \
+    curl \
+    xvfb \
+    chromium \
+    chromium-driver \
+    fonts-liberation \
+    libappindicator3-1 \
+    libasound2 \
+    libatk-bridge2.0-0 \
+    libdrm2 \
+    libxcomposite1 \
+    libxdamage1 \
+    libxrandr2 \
+    libgbm1 \
+    libxss1 \
+    libnss3 \
+    && rm -rf /var/lib/apt/lists/*
+
+# Vérifier l'installation de Chromium
+RUN echo "=== Vérification de Chromium ===" \
     && chromium --version \
     && which chromium \
-    && ls -la /usr/bin/chromium* \
-    && rm -rf /var/lib/apt/lists/*
+    && ls -la /usr/bin/chromium*
 
 # Créer un utilisateur non-root pour la sécurité
 RUN useradd --create-home --shell /bin/bash app
@@ -60,7 +60,7 @@ EXPOSE 8080
 ENV PYTHONUNBUFFERED=1
 ENV PYTHONDONTWRITEBYTECODE=1
 
-# Variables d'environnement pour Chromium/Selenium optimisées pour Render
+# Variables d'environnement pour Chrome/Selenium optimisées pour Render
 ENV DISPLAY=:99
 ENV CHROME_BIN=/usr/bin/chromium
 ENV CHROME_NO_SANDBOX=1
