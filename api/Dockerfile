@@ -39,13 +39,8 @@ RUN echo "=== Vérification de Google Chrome ===" \
     && which google-chrome-stable \
     && ls -la /usr/bin/google-chrome*
 
-# Installer ChromeDriver (méthode moderne pour Chrome 115+)
-RUN CHROME_MAJOR_VERSION=$(google-chrome-stable --version | cut -d ' ' -f3 | cut -d '.' -f1) \
-    && echo "Chrome major version: $CHROME_MAJOR_VERSION" \
-    && LATEST_CHROMEDRIVER_VERSION=$(curl -s "https://googlechromelabs.github.io/chrome-for-testing/latest-patch-versions-per-build.json" | jq -r ".builds[\"$CHROME_MAJOR_VERSION\"].version") \
-    && if [ -z "$LATEST_CHROMEDRIVER_VERSION" ] || [ "$LATEST_CHROMEDRIVER_VERSION" = "null" ]; then echo "Failed to find a matching ChromeDriver version for Chrome $CHROME_MAJOR_VERSION"; exit 1; fi \
-    && echo "Found ChromeDriver version: $LATEST_CHROMEDRIVER_VERSION" \
-    && CHROMEDRIVER_URL=$(curl -s "https://googlechromelabs.github.io/chrome-for-testing/latest-versions-with-downloads.json" | jq -r ".versions[] | select(.version == \"$LATEST_CHROMEDRIVER_VERSION\") | .downloads.chromedriver[] | select(.platform == \"linux64\") | .url") \
+# Installer ChromeDriver (méthode moderne et robuste pour Chrome 115+)
+RUN CHROMEDRIVER_URL=$(curl -s https://googlechromelabs.github.io/chrome-for-testing/last-known-good-versions-with-downloads.json | jq -r '.channels.Stable.downloads.chromedriver[] | select(.platform=="linux64") | .url') \
     && echo "ChromeDriver download URL: $CHROMEDRIVER_URL" \
     && wget --quiet -O /tmp/chromedriver.zip "$CHROMEDRIVER_URL" \
     && unzip /tmp/chromedriver.zip -d /usr/local/bin/ \
