@@ -28,11 +28,21 @@ RUN apt-get update && apt-get install -y \
     libappindicator1 \
     libnss3 \
     libgbm1 \
+    && rm -rf /var/lib/apt/lists/*
+
+# Installation de Chrome avec gestion d'erreurs explicite
+RUN echo "=== Installation de Chrome ===" \
     && wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add - \
     && echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" > /etc/apt/sources.list.d/google-chrome.list \
     && apt-get update \
-    && (apt-get install -y google-chrome-stable || apt-get install -y chromium-browser) \
-    && (google-chrome-stable --version || chromium-browser --version || echo "Browser installé") \
+    && echo "=== Tentative d'installation de Google Chrome ===" \
+    && if apt-get install -y google-chrome-stable; then \
+        echo "✅ Google Chrome installé avec succès" && google-chrome-stable --version; \
+    else \
+        echo "❌ Échec de Google Chrome, installation de Chromium..." \
+        && apt-get install -y chromium-browser \
+        && echo "✅ Chromium installé avec succès" && chromium-browser --version; \
+    fi \
     && rm -rf /var/lib/apt/lists/*
 
 # Créer un utilisateur non-root pour la sécurité
