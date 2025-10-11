@@ -548,7 +548,7 @@ def get_dcf_analysis(ticker: str, wacc: Optional[float] = None) -> Dict:
         
         # Tentative de fallback vers yfinance si stockdx échoue
         if ("'NoneType' object has no attribute 'find_all'" in error_msg or 
-            "Erreur lors de la récupération des données" in error_msg) and ALTERNATIVE_AVAILABLE:
+            "Erreur lors de la récupération des données" in error_msg):
             
             print(f"⚠️  Échec de stockdx pour {ticker}, tentative avec yfinance...")
             try:

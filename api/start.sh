@@ -12,29 +12,58 @@ sleep 2
 
 # Vérifier que Chromium est disponible
 echo "🔍 Vérification de Chromium..."
+
+# Diagnostic complet du système
+echo "🔍 Diagnostic du système..."
+echo "📋 Packages Chromium installés:"
+dpkg -l | grep -i chromium || echo "Aucun package Chromium trouvé"
+
+echo "🔍 Recherche de binaires Chromium..."
+find /usr -name "*chromium*" -type f -executable 2>/dev/null | head -10
+
+echo "🔍 Vérification des chemins standards..."
 CHROMIUM_PATHS=(
     "/usr/bin/chromium"
     "/usr/bin/chromium-browser"
     "/snap/bin/chromium"
+    "/usr/lib/chromium-browser/chromium-browser"
 )
 
 CHROMIUM_FOUND=false
 for chromium_path in "${CHROMIUM_PATHS[@]}"; do
-    if [ -f "$chromium_path" ]; then
+    echo "🔍 Vérification de: $chromium_path"
+    if [ -f "$chromium_path" ] && [ -x "$chromium_path" ]; then
         echo "✅ Chromium trouvé: $chromium_path"
-        echo "✅ Version: $($chromium_path --version 2>/dev/null || echo 'Version non disponible')"
+        version_output=$($chromium_path --version 2>/dev/null || echo 'Version non disponible')
+        echo "✅ Version: $version_output"
         export CHROME_BIN="$chromium_path"
         CHROMIUM_FOUND=true
         break
+    else
+        echo "❌ Non trouvé ou non exécutable: $chromium_path"
     fi
 done
 
+# Si pas trouvé, essayer avec which
 if [ "$CHROMIUM_FOUND" = false ]; then
-    echo "❌ Chromium non trouvé dans les emplacements standards!"
-    echo "🔍 Recherche de Chromium dans le système..."
-    find /usr -name "*chromium*" -type f 2>/dev/null | head -5
-    echo "📋 Packages Chromium installés:"
-    dpkg -l | grep -i chromium || echo "Aucun package Chromium trouvé"
+    echo "🔍 Recherche avec 'which'..."
+    for cmd in chromium chromium-browser; do
+        chromium_which=$(which $cmd 2>/dev/null)
+        if [ -n "$chromium_which" ]; then
+            echo "✅ Chromium trouvé via which: $chromium_which"
+            export CHROME_BIN="$chromium_which"
+            CHROMIUM_FOUND=true
+            break
+        fi
+    done
+fi
+
+if [ "$CHROMIUM_FOUND" = false ]; then
+    echo "❌ Chromium non trouvé!"
+    echo "🔍 Contenu de /usr/bin/ (chromium*):"
+    ls -la /usr/bin/chromium* 2>/dev/null || echo "Aucun fichier chromium* dans /usr/bin/"
+    echo "🔍 Contenu de /usr/lib/ (chromium*):"
+    find /usr/lib -name "*chromium*" -type f 2>/dev/null | head -5 || echo "Aucun fichier chromium* dans /usr/lib/"
     exit 1
 fi
 
