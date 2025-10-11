@@ -1,6 +1,6 @@
 #!/bin/bash
 
-echo "🚀 Démarrage de l'application avec support Chromium/Selenium..."
+echo "🚀 Démarrage de l'application avec support Google Chrome/Selenium..."
 
 # Configuration de l'affichage virtuel
 echo "📺 Configuration de l'affichage virtuel..."
@@ -10,60 +10,60 @@ export DISPLAY=:99
 # Attendre que Xvfb soit prêt
 sleep 2
 
-# Vérifier que Chromium est disponible
-echo "🔍 Vérification de Chromium..."
+# Vérifier que Google Chrome est disponible
+echo "🔍 Vérification de Google Chrome..."
 
 # Diagnostic complet du système
 echo "🔍 Diagnostic du système..."
-echo "📋 Packages Chromium installés:"
-dpkg -l | grep -i chromium || echo "Aucun package Chromium trouvé"
+echo "📋 Packages Chrome installés:"
+dpkg -l | grep -i chrome || echo "Aucun package Chrome trouvé"
 
-echo "🔍 Recherche de binaires Chromium..."
-find /usr -name "*chromium*" -type f -executable 2>/dev/null | head -10
+echo "🔍 Recherche de binaires Chrome..."
+find /usr -name "*chrome*" -type f -executable 2>/dev/null | head -10
 
 echo "🔍 Vérification des chemins standards..."
-CHROMIUM_PATHS=(
+CHROME_PATHS=(
+    "/usr/bin/google-chrome-stable"
+    "/usr/bin/google-chrome"
     "/usr/bin/chromium"
     "/usr/bin/chromium-browser"
-    "/snap/bin/chromium"
-    "/usr/lib/chromium-browser/chromium-browser"
 )
 
-CHROMIUM_FOUND=false
-for chromium_path in "${CHROMIUM_PATHS[@]}"; do
-    echo "🔍 Vérification de: $chromium_path"
-    if [ -f "$chromium_path" ] && [ -x "$chromium_path" ]; then
-        echo "✅ Chromium trouvé: $chromium_path"
-        version_output=$($chromium_path --version 2>/dev/null || echo 'Version non disponible')
+CHROME_FOUND=false
+for chrome_path in "${CHROME_PATHS[@]}"; do
+    echo "🔍 Vérification de: $chrome_path"
+    if [ -f "$chrome_path" ] && [ -x "$chrome_path" ]; then
+        echo "✅ Chrome trouvé: $chrome_path"
+        version_output=$($chrome_path --version 2>/dev/null || echo 'Version non disponible')
         echo "✅ Version: $version_output"
-        export CHROME_BIN="$chromium_path"
-        CHROMIUM_FOUND=true
+        export CHROME_BIN="$chrome_path"
+        CHROME_FOUND=true
         break
     else
-        echo "❌ Non trouvé ou non exécutable: $chromium_path"
+        echo "❌ Non trouvé ou non exécutable: $chrome_path"
     fi
 done
 
 # Si pas trouvé, essayer avec which
-if [ "$CHROMIUM_FOUND" = false ]; then
+if [ "$CHROME_FOUND" = false ]; then
     echo "🔍 Recherche avec 'which'..."
-    for cmd in chromium chromium-browser; do
-        chromium_which=$(which $cmd 2>/dev/null)
-        if [ -n "$chromium_which" ]; then
-            echo "✅ Chromium trouvé via which: $chromium_which"
-            export CHROME_BIN="$chromium_which"
-            CHROMIUM_FOUND=true
+    for cmd in google-chrome-stable google-chrome chromium chromium-browser; do
+        chrome_which=$(which $cmd 2>/dev/null)
+        if [ -n "$chrome_which" ]; then
+            echo "✅ Chrome trouvé via which: $chrome_which"
+            export CHROME_BIN="$chrome_which"
+            CHROME_FOUND=true
             break
         fi
     done
 fi
 
-if [ "$CHROMIUM_FOUND" = false ]; then
-    echo "❌ Chromium non trouvé!"
-    echo "🔍 Contenu de /usr/bin/ (chromium*):"
-    ls -la /usr/bin/chromium* 2>/dev/null || echo "Aucun fichier chromium* dans /usr/bin/"
-    echo "🔍 Contenu de /usr/lib/ (chromium*):"
-    find /usr/lib -name "*chromium*" -type f 2>/dev/null | head -5 || echo "Aucun fichier chromium* dans /usr/lib/"
+if [ "$CHROME_FOUND" = false ]; then
+    echo "❌ Chrome non trouvé!"
+    echo "🔍 Contenu de /usr/bin/ (chrome*):"
+    ls -la /usr/bin/*chrome* 2>/dev/null || echo "Aucun fichier chrome* dans /usr/bin/"
+    echo "🔍 Contenu de /usr/local/bin/ (chrome*):"
+    ls -la /usr/local/bin/*chrome* 2>/dev/null || echo "Aucun fichier chrome* dans /usr/local/bin/"
     exit 1
 fi
 
