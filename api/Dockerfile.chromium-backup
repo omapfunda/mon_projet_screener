@@ -1,10 +1,10 @@
-# Dockerfile fallback avec Google Chrome pour Render
+# Dockerfile optimisé pour Render avec Chromium
 FROM python:3.11-slim
 
 # Définir le répertoire de travail
 WORKDIR /app
 
-# Installer les dépendances système et Google Chrome
+# Installer les dépendances système pour Chromium et Selenium
 RUN echo "=== Mise à jour des packages ===" \
     && apt-get update \
     && echo "=== Installation des dépendances de base ===" \
@@ -26,24 +26,17 @@ RUN echo "=== Mise à jour des packages ===" \
         libxss1 \
         libnss3 \
         ca-certificates \
-    && echo "=== Ajout de la clé Google Chrome ===" \
-    && wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | apt-key add - \
-    && echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" > /etc/apt/sources.list.d/google-chrome.list \
-    && echo "=== Installation de Google Chrome ===" \
-    && apt-get update \
-    && apt-get install -y --no-install-recommends google-chrome-stable \
+    && echo "=== Installation de Chromium ===" \
+    && apt-get install -y --no-install-recommends chromium chromium-driver \
     && echo "=== Vérification de l'installation ===" \
-    && google-chrome-stable --version \
-    && which google-chrome-stable \
-    && echo "=== Installation de ChromeDriver ===" \
-    && CHROME_VERSION=$(google-chrome-stable --version | cut -d " " -f3 | cut -d "." -f1) \
-    && CHROMEDRIVER_VERSION=$(curl -s "https://chromedriver.storage.googleapis.com/LATEST_RELEASE_${CHROME_VERSION}") \
-    && wget -O /tmp/chromedriver.zip "https://chromedriver.storage.googleapis.com/${CHROMEDRIVER_VERSION}/chromedriver_linux64.zip" \
-    && unzip /tmp/chromedriver.zip -d /tmp/ \
-    && mv /tmp/chromedriver /usr/local/bin/chromedriver \
-    && chmod +x /usr/local/bin/chromedriver \
+    && ls -la /usr/bin/chromium* || echo "Chromium binaries not found in /usr/bin/" \
+    && which chromium || echo "Chromium not in PATH" \
+    && chromium --version || echo "Chromium version check failed" \
+    && which chromium-driver || echo "Chromium driver not found" \
+    && echo "=== Création de liens symboliques si nécessaire ===" \
+    && if [ ! -f /usr/bin/chromium ] && [ -f /usr/bin/chromium-browser ]; then ln -s /usr/bin/chromium-browser /usr/bin/chromium; fi \
     && echo "=== Nettoyage ===" \
-    && rm -rf /var/lib/apt/lists/* /tmp/chromedriver.zip \
+    && rm -rf /var/lib/apt/lists/* \
     && echo "=== Installation terminée ==="
 
 # Créer un utilisateur non-root pour la sécurité
@@ -74,9 +67,9 @@ EXPOSE 8080
 ENV PYTHONUNBUFFERED=1
 ENV PYTHONDONTWRITEBYTECODE=1
 
-# Variables d'environnement pour Chrome/Selenium optimisées pour Render
+# Variables d'environnement pour Chromium/Selenium optimisées pour Render
 ENV DISPLAY=:99
-ENV CHROME_BIN=/usr/bin/google-chrome-stable
+ENV CHROME_BIN=/usr/bin/chromium
 ENV CHROME_NO_SANDBOX=1
 ENV CHROME_DISABLE_DEV_SHM_USAGE=1
 ENV CHROME_DISABLE_GPU=1
