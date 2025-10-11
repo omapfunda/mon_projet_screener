@@ -54,17 +54,17 @@ RUN CHROMEDRIVER_URL=$(curl -s https://googlechromelabs.github.io/chrome-for-tes
 # Créer un utilisateur non-root pour la sécurité
 RUN useradd --create-home --shell /bin/bash app
 
-# Copier les fichiers de dépendances
-COPY requirements.txt .
+# Copier le fichier de dépendances de l'API
+COPY api/requirements.txt .
 
 # Installer les dépendances Python
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copier le reste du code de l'application
+# Copier tout le code de l'application
 COPY . .
 
 # Rendre le script de démarrage exécutable
-RUN chmod +x start.sh
+RUN chmod +x api/start.sh
 
 # Définir les permissions appropriées
 RUN chown -R app:app /app
@@ -75,17 +75,13 @@ USER app
 # Exposer le port
 EXPOSE 8080
 
-# Variables d'environnement Python
+# Définir les variables d'environnement pour Python
 ENV PYTHONUNBUFFERED=1
 ENV PYTHONDONTWRITEBYTECODE=1
 
-# Variables d'environnement Chrome/Selenium optimisées pour Render
+# Définir les variables d'environnement pour Chrome/Selenium (optimisées pour Render)
 ENV CHROME_BIN=/usr/bin/google-chrome-stable
-ENV CHROME_PATH=/usr/bin/google-chrome-stable
-ENV CHROMIUM_PATH=/usr/bin/google-chrome-stable
-ENV GOOGLE_CHROME_BIN=/usr/bin/google-chrome-stable
 ENV DISPLAY=:99
-ENV CHROME_OPTIONS="--headless --no-sandbox --disable-dev-shm-usage --disable-gpu --disable-extensions --disable-plugins --disable-images --disable-javascript --window-size=1920,1080"
 
 # Commande de démarrage
-CMD ["./start.sh"]
+CMD ["/app/api/start.sh"]
