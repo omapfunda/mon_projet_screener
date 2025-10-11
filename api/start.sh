@@ -75,6 +75,9 @@ else
     echo "⚠️  Test Chromium échoué, mais on continue..."
 fi
 
+# Se placer dans le bon répertoire
+cd /app/api
+
 # Test rapide de la configuration stockdx
 echo "🧪 Test de la configuration stockdx..."
 python3 -c "
@@ -89,4 +92,4 @@ except Exception as e:
 
 # Démarrer l'application
 echo "🚀 Lancement de l'application..."
-exec gunicorn main:app --host 0.0.0.0 --port 8080 --workers 1 --timeout 120
+exec gunicorn --bind 0.0.0.0:8080 --workers 1 --timeout 120 main:app
