@@ -3,6 +3,12 @@
 import yfinance as yf
 import pandas as pd
 import numpy as np
+
+# Configuration Selenium optimisée pour stockdex AVANT l'import
+from selenium_config import setup_stockdx_selenium
+# Appliquer la configuration optimisée pour stockdex
+setup_stockdx_selenium()
+
 from stockdex import Ticker as StockdexTicker
 import requests
 import time
