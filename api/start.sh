@@ -92,4 +92,4 @@ except Exception as e:
 
 # Démarrer l'application
 echo "🚀 Lancement de l'application..."
-exec gunicorn --bind 0.0.0.0:8080 --workers 1 --timeout 120 main:app
+exec gunicorn --bind 0.0.0.0:8080 --workers 1 --worker-class uvicorn.workers.UvicornWorker --timeout 120 main:app
