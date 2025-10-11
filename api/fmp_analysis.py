@@ -376,7 +376,7 @@ def run_dcf_valuation(
     return intrinsic_value_per_share, enterprise_value, equity_value
 
 
-@cache_api_response(source="dcf_analysis")
+@cache_api_response
 def get_dcf_analysis(ticker: str, wacc: Optional[float] = None) -> Dict:
     """
     Effectue une analyse DCF complète pour un ticker donné.
