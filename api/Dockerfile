@@ -11,6 +11,7 @@ RUN apt-get update && apt-get install -y \
     unzip \
     curl \
     xvfb \
+    jq \
     fonts-liberation \
     libappindicator3-1 \
     libasound2 \
@@ -38,16 +39,21 @@ RUN echo "=== Vérification de Google Chrome ===" \
     && which google-chrome-stable \
     && ls -la /usr/bin/google-chrome*
 
-# Installer ChromeDriver
-RUN CHROME_VERSION=$(google-chrome-stable --version | cut -d " " -f3 | cut -d "." -f1) \
-    && echo "Chrome version: $CHROME_VERSION" \
-    && CHROMEDRIVER_VERSION=$(curl -s "https://chromedriver.storage.googleapis.com/LATEST_RELEASE_$CHROME_VERSION") \
-    && echo "ChromeDriver version: $CHROMEDRIVER_VERSION" \
-    && wget -O /tmp/chromedriver.zip "https://chromedriver.storage.googleapis.com/$CHROMEDRIVER_VERSION/chromedriver_linux64.zip" \
-    && unzip /tmp/chromedriver.zip -d /tmp/ \
-    && mv /tmp/chromedriver /usr/local/bin/chromedriver \
-    && chmod +x /usr/local/bin/chromedriver \
+# Installer ChromeDriver (méthode moderne pour Chrome 115+)
+RUN CHROME_MAJOR_VERSION=$(google-chrome-stable --version | cut -d ' ' -f3 | cut -d '.' -f1) \
+    && echo "Chrome major version: $CHROME_MAJOR_VERSION" \
+    && LATEST_CHROMEDRIVER_VERSION=$(curl -s "https://googlechromelabs.github.io/chrome-for-testing/latest-patch-versions-per-build.json" | jq -r ".builds[\"$CHROME_MAJOR_VERSION\"].version") \
+    && if [ -z "$LATEST_CHROMEDRIVER_VERSION" ] || [ "$LATEST_CHROMEDRIVER_VERSION" = "null" ]; then echo "Failed to find a matching ChromeDriver version for Chrome $CHROME_MAJOR_VERSION"; exit 1; fi \
+    && echo "Found ChromeDriver version: $LATEST_CHROMEDRIVER_VERSION" \
+    && CHROMEDRIVER_URL=$(curl -s "https://googlechromelabs.github.io/chrome-for-testing/latest-versions-with-downloads.json" | jq -r ".versions[] | select(.version == \"$LATEST_CHROMEDRIVER_VERSION\") | .downloads.chromedriver[] | select(.platform == \"linux64\") | .url") \
+    && echo "ChromeDriver download URL: $CHROMEDRIVER_URL" \
+    && wget --quiet -O /tmp/chromedriver.zip "$CHROMEDRIVER_URL" \
+    && unzip /tmp/chromedriver.zip -d /usr/local/bin/ \
+    && chmod +x /usr/local/bin/chromedriver-linux64/chromedriver \
+    && mv /usr/local/bin/chromedriver-linux64/chromedriver /usr/local/bin/chromedriver \
+    && rmdir /usr/local/bin/chromedriver-linux64 \
     && rm /tmp/chromedriver.zip \
+    && echo "ChromeDriver installed at: $(which chromedriver)" \
     && chromedriver --version
 
 # Créer un utilisateur non-root pour la sécurité
