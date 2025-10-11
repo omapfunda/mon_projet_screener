@@ -550,7 +550,7 @@ def get_dcf_analysis(ticker: str, wacc: Optional[float] = None) -> Dict:
         if ("'NoneType' object has no attribute 'find_all'" in error_msg or 
             "Erreur lors de la récupération des données" in error_msg):
             
-            print(f"⚠️  Échec de stockdx pour {ticker}, tentative avec yfinance...")
+            print(f"⚠️  Échec de stockdex pour {ticker}")
 
         
         # Ajouter des suggestions spécifiques pour les erreurs de récupération de données
@@ -617,6 +617,6 @@ def display_dcf_results(results: Dict) -> None:
 if __name__ == "__main__":
     # Test avec Microsoft
     ticker = "LULU"
-    print(f"Analyse DCF pour {ticker} (données Macrotrends via stockdx)\n")
+    print(f"Analyse DCF pour {ticker} (données Macrotrends via stockdex)\n")
     results = get_dcf_analysis(ticker)
     display_dcf_results(results)
