@@ -216,56 +216,91 @@ class CacheManager:
     """Gestionnaire de cache Redis pour les données temporaires"""
     
     def __init__(self, redis_url: str = REDIS_URL):
+        self.redis_client = None
+        self._memory_cache = {}
+        self._redis_available = False
+        
+        # Tentative de connexion Redis avec timeout plus court
         try:
-            self.redis_client = redis.from_url(redis_url, decode_responses=True)
-            self.redis_client.ping()  # Test de connexion
-            logger.info("Connexion Redis établie")
-        except (redis.ConnectionError, redis.TimeoutError):
-            logger.warning("Redis non disponible, utilisation du cache en mémoire")
+            if redis_url and redis_url != "redis://localhost:6379":
+                # Seulement si une URL Redis réelle est fournie
+                self.redis_client = redis.from_url(
+                    redis_url, 
+                    decode_responses=True,
+                    socket_timeout=5,
+                    socket_connect_timeout=5,
+                    retry_on_timeout=False
+                )
+                self.redis_client.ping()  # Test de connexion
+                self._redis_available = True
+                logger.info(f"✅ Connexion Redis établie: {redis_url}")
+            else:
+                logger.info("🔄 Redis URL par défaut détectée, utilisation du cache mémoire")
+        except Exception as e:
+            logger.warning(f"⚠️  Redis non disponible ({e}), utilisation du cache en mémoire")
             self.redis_client = None
-            self._memory_cache = {}
+            self._redis_available = False
     
     def set(self, key: str, value: Any, ttl: int = CACHE_TTL):
         """Met une valeur en cache"""
         try:
-            if self.redis_client:
-                self.redis_client.setex(key, ttl, json.dumps(value))
-            else:
-                # Fallback vers cache mémoire
-                self._memory_cache[key] = {
-                    'value': value,
-                    'expires': datetime.now() + timedelta(seconds=ttl)
-                }
+            if self._redis_available and self.redis_client:
+                try:
+                    self.redis_client.setex(key, ttl, json.dumps(value))
+                    return
+                except Exception as redis_error:
+                    logger.warning(f"⚠️  Redis set failed, falling back to memory: {redis_error}")
+                    self._redis_available = False
+            
+            # Fallback vers cache mémoire
+            self._memory_cache[key] = {
+                'value': value,
+                'expires': datetime.now() + timedelta(seconds=ttl)
+            }
+            
         except Exception as e:
-            logger.error(f"Erreur cache set: {e}")
+            logger.error(f"❌ Erreur cache set: {e}")
     
     def get(self, key: str) -> Optional[Any]:
         """Récupère une valeur du cache"""
         try:
-            if self.redis_client:
-                value = self.redis_client.get(key)
-                return json.loads(value) if value else None
-            else:
-                # Fallback vers cache mémoire
-                cached = self._memory_cache.get(key)
-                if cached and cached['expires'] > datetime.now():
-                    return cached['value']
-                elif cached:
-                    del self._memory_cache[key]
-                return None
+            if self._redis_available and self.redis_client:
+                try:
+                    value = self.redis_client.get(key)
+                    if value:
+                        return json.loads(value)
+                except Exception as redis_error:
+                    logger.warning(f"⚠️  Redis get failed, falling back to memory: {redis_error}")
+                    self._redis_available = False
+            
+            # Fallback vers cache mémoire
+            cached = self._memory_cache.get(key)
+            if cached and cached['expires'] > datetime.now():
+                return cached['value']
+            elif cached:
+                del self._memory_cache[key]
+            return None
+            
         except Exception as e:
-            logger.error(f"Erreur cache get: {e}")
+            logger.error(f"❌ Erreur cache get: {e}")
             return None
     
     def delete(self, key: str):
         """Supprime une clé du cache"""
         try:
-            if self.redis_client:
-                self.redis_client.delete(key)
-            else:
-                self._memory_cache.pop(key, None)
+            if self._redis_available and self.redis_client:
+                try:
+                    self.redis_client.delete(key)
+                    return
+                except Exception as redis_error:
+                    logger.warning(f"⚠️  Redis delete failed, using memory: {redis_error}")
+                    self._redis_available = False
+            
+            # Fallback vers cache mémoire
+            self._memory_cache.pop(key, None)
+            
         except Exception as e:
-            logger.error(f"Erreur cache delete: {e}")
+            logger.error(f"❌ Erreur cache delete: {e}")
     
     def clear_pattern(self, pattern: str):
         """Supprime toutes les clés correspondant au pattern"""

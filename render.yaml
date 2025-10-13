@@ -10,6 +10,17 @@ services:
         value: 8080
       - key: PYTHON_VERSION
         value: 3.11
+      - key: DATABASE_PATH
+        value: /app/screener.db
+      - key: CACHE_TTL
+        value: 3600
+      - key: REDIS_URL
+        value: redis://localhost:6379
+      - key: FMP_API_KEY
+        fromService:
+          type: web
+          name: screener-api
+          envVarKey: FMP_API_KEY
     healthCheckPath: /
     autoDeploy: true
     branch: main
